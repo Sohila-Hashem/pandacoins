@@ -1,16 +1,16 @@
 import { endOfMonth, format, getDaysInMonth, isWithinInterval, startOfMonth } from "date-fns";
-import type { Expense, ExpenseCategories } from "./expense";
+import type { Expense, ExpenseCategory } from "./expense";
 import { formatCurrency } from "@/lib/utils";
 import { BALANCED_SPENDING_MESSAGE, HIGH_SPENDING_MESSAGE, HIGH_SPENDING_THRESHOLD, LOW_SPENDING_MESSAGE, LOW_SPENDING_THRESHOLD, MEDIUM_SPENDING_MESSAGE, MEDIUM_SPENDING_THRESHOLD } from "@/lib/constants";
 
 export interface TopCategory {
-    category: ExpenseCategories;
+    category: ExpenseCategory;
     amount: number;
 }
 
 export interface ReportInsights {
     total: number;
-    categoryTotals: Record<ExpenseCategories, number>;
+    categoryTotals: Record<ExpenseCategory, number>;
     categoryPercentages: CategoryStats[];
     topCategory: TopCategory;
     dailyAvg: number;
@@ -18,7 +18,7 @@ export interface ReportInsights {
 }
 
 export interface CategoryStats {
-    category: ExpenseCategories;
+    category: ExpenseCategory;
     amount: number;
     percentage: number;
 }
@@ -100,7 +100,7 @@ export const getCategoriesTotal = (expenses: Expense[]) => {
     return expenses.reduce((acc, exp) => {
         acc[exp.category] = (acc[exp.category] || 0) + exp.amount;
         return acc;
-    }, {} as Record<ExpenseCategories, number>);
+    }, {} as Record<ExpenseCategory, number>);
 }
 
 export const getMonthExpenses = (expenses: Expense[], month: string) => {
@@ -118,19 +118,19 @@ export const getMonthTotal = (expenses: Expense[]) => {
     return expenses.reduce((acc, exp) => acc + exp.amount, 0);
 }
 
-export const getTopCategory = (categoriesTotal: Record<ExpenseCategories, number>): TopCategory => {
+export const getTopCategory = (categoriesTotal: Record<ExpenseCategory, number>): TopCategory => {
     const entries = Object.entries(categoriesTotal);
     if (entries.length === 0) {
-        return { category: "Other" as ExpenseCategories, amount: 0 };
+        return { category: "Other" as ExpenseCategory, amount: 0 };
     }
     const [category, amount] = entries.sort(([, a], [, b]) => b - a)[0];
-    return { category: category as ExpenseCategories, amount };
+    return { category: category, amount };
 }
 
-export const getCategoriesTotalPercentage = (categoriesTotal: Record<ExpenseCategories, number>, total: number): CategoryStats[] => {
+export const getCategoriesTotalPercentage = (categoriesTotal: Record<ExpenseCategory, number>, total: number): CategoryStats[] => {
     return Object.entries(categoriesTotal).map(([category, amount]) => {
         return {
-            category: category as ExpenseCategories,
+            category: category,
             amount,
             percentage: (amount / total) * 100
         };

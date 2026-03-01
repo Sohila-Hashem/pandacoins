@@ -1,8 +1,8 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format, formatISO } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Tag } from "lucide-react";
 import { motion } from "motion/react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,10 @@ import { Label } from "@/components/ui/label";
 import {
 	Select,
 	SelectContent,
+	SelectGroup,
 	SelectItem,
+	SelectLabel,
+	SelectSeparator,
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
@@ -25,6 +28,7 @@ import { CATEGORIES_SORTED, type Expense } from "@/domain/expense";
 import { type Currency } from "@/lib/constants";
 import { expenseSchema, type ExpenseFormData } from "@/schemas/expense-schema";
 import { cn } from "@/lib/utils";
+import { AddCustomCategoryDialog } from "./add-custom-category-dialog";
 
 interface ExpenseFormProps {
 	onAddExpense: (expense: Omit<Expense, "id">) => void;
@@ -32,6 +36,8 @@ interface ExpenseFormProps {
 	onUpdateExpense?: (expense: Expense) => void;
 	onCancelEdit?: () => void;
 	currency: Currency;
+	customCategories: string[];
+	onAddCustomCategory: (category: string) => void;
 }
 
 export function ExpenseForm({
@@ -40,7 +46,13 @@ export function ExpenseForm({
 	onAddExpense,
 	onUpdateExpense,
 	onCancelEdit,
+	customCategories,
+	onAddCustomCategory,
 }: ExpenseFormProps) {
+	const [dialogOpen, setDialogOpen] = useState(false);
+	const [newCategoryInput, setNewCategoryInput] = useState("");
+	const [newCategoryError, setNewCategoryError] = useState("");
+
 	const {
 		control,
 		handleSubmit,
@@ -49,19 +61,19 @@ export function ExpenseForm({
 	} = useForm<ExpenseFormData>({
 		resolver: zodResolver(expenseSchema),
 		defaultValues: {
-			description: undefined,
-			amount: undefined,
-			date: undefined,
-			category: undefined,
+			description: editingExpense?.description ?? "",
+			amount: editingExpense?.amount ?? undefined,
+			date: editingExpense ? new Date(editingExpense.date) : new Date(),
+			category: editingExpense?.category ?? "",
 		},
 	});
 
 	const resetForm = useCallback(() => {
 		reset({
-			description: undefined,
+			description: "",
 			amount: undefined,
-			date: undefined,
-			category: undefined,
+			date: new Date(),
+			category: "",
 		});
 	}, [reset]);
 
@@ -83,10 +95,7 @@ export function ExpenseForm({
 		};
 
 		if (editingExpense && onUpdateExpense) {
-			onUpdateExpense({
-				...expenseData,
-				id: editingExpense.id,
-			});
+			onUpdateExpense({ ...expenseData, id: editingExpense.id });
 		} else {
 			onAddExpense(expenseData);
 		}
@@ -97,10 +106,18 @@ export function ExpenseForm({
 	useEffect(() => {
 		if (editingExpense) {
 			setEditingExpense(editingExpense);
-			return
+			return;
 		}
 		resetForm();
 	}, [editingExpense, resetForm, setEditingExpense]);
+
+	const handleDialogOpenChange = (open: boolean) => {
+		setDialogOpen(open);
+		if (!open) {
+			setNewCategoryInput("");
+			setNewCategoryError("");
+		}
+	};
 
 	return (
 		<motion.div
@@ -129,9 +146,7 @@ export function ExpenseForm({
 								)}
 							/>
 							{errors.description && (
-								<p className="text-sm text-destructive">
-									{errors.description.message}
-								</p>
+								<p className="text-sm text-destructive">{errors.description.message}</p>
 							)}
 						</div>
 
@@ -147,14 +162,12 @@ export function ExpenseForm({
 										step="0.01"
 										placeholder="0.00"
 										value={field.value ?? ""}
-										onChange={(e) => field.onChange(Number(e.target.value))}
+										onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : e.target.value)}
 									/>
 								)}
 							/>
 							{errors.amount && (
-								<p className="text-sm text-destructive">
-									{errors.amount.message}
-								</p>
+								<p className="text-sm text-destructive">{errors.amount.message}</p>
 							)}
 						</div>
 
@@ -172,11 +185,7 @@ export function ExpenseForm({
 												className="w-full bg-input-background justify-start text-left font-normal"
 											>
 												<CalendarIcon className="mr-2 h-4 w-4" />
-												{field.value ? (
-													format(field.value, "PPP")
-												) : (
-													<span>Pick a date</span>
-												)}
+												{field.value && !isNaN(new Date(field.value).getTime()) ? format(field.value, "PPP") : <span>Pick a date</span>}
 											</Button>
 										</PopoverTrigger>
 										<PopoverContent className="w-auto p-0" align="start">
@@ -190,14 +199,17 @@ export function ExpenseForm({
 								)}
 							/>
 							{errors.date && (
-								<p className="text-sm text-destructive">
-									{errors.date.message}
-								</p>
+								<p className="text-sm text-destructive">{errors.date.message}</p>
 							)}
 						</div>
 
 						<div className="space-y-2">
-							<Label htmlFor="category">Category</Label>
+							{/* Category label row with inline + button */}
+							<div className="flex items-center justify-between">
+								<Label htmlFor="category">Category</Label>
+								<AddCustomCategoryDialog dialogOpen={dialogOpen} handleDialogOpenChange={handleDialogOpenChange} newCategoryInput={newCategoryInput} setNewCategoryInput={setNewCategoryInput} newCategoryError={newCategoryError} setNewCategoryError={setNewCategoryError} handleAddCustomCategory={onAddCustomCategory} />
+							</div>
+
 							<Controller
 								control={control}
 								name="category"
@@ -207,19 +219,36 @@ export function ExpenseForm({
 											<SelectValue aria-label="Select category" placeholder="Select category" />
 										</SelectTrigger>
 										<SelectContent>
-											{CATEGORIES_SORTED.map((cat) => (
-												<SelectItem key={cat.category} value={cat.category}>
-													{cat.category}
-												</SelectItem>
-											))}
+											{customCategories.length > 0 && (
+												<>
+													<SelectGroup>
+														<SelectLabel className="flex items-center gap-1.5">
+															<Tag className="size-3" />
+															My Categories
+														</SelectLabel>
+														{customCategories.map((cat) => (
+															<SelectItem key={cat} value={cat}>
+																{cat}
+															</SelectItem>
+														))}
+													</SelectGroup>
+													<SelectSeparator />
+												</>
+											)}
+											<SelectGroup>
+												<SelectLabel>Preset Categories</SelectLabel>
+												{CATEGORIES_SORTED.map((cat) => (
+													<SelectItem key={cat.category} value={cat.category}>
+														{cat.category}
+													</SelectItem>
+												))}
+											</SelectGroup>
 										</SelectContent>
 									</Select>
 								)}
 							/>
 							{errors.category && (
-								<p className="text-sm text-destructive">
-									{errors.category.message}
-								</p>
+								<p className="text-sm text-destructive">{errors.category.message}</p>
 							)}
 						</div>
 
@@ -244,4 +273,3 @@ export function ExpenseForm({
 		</motion.div>
 	);
 }
-

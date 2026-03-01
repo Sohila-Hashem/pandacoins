@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { CATEGORIES } from "@/domain/expense";
 
 export const expenseSchema = z.object({
     description: z
@@ -11,7 +10,7 @@ export const expenseSchema = z.object({
         .min(0.1, "Amount must be at least 0.1")
         .max(1000000000, "Amount is too large"),
     date: z.date("Date is required"),
-    category: z.enum(CATEGORIES.map((c) => c.category), "Category is required"),
+    category: z.string("Category is required").trim().min(1, "Category is required"),
 });
 
 export type ExpenseFormData = z.infer<typeof expenseSchema>;

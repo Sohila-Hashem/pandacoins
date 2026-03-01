@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { format } from "date-fns";
-import { Pencil, Trash2 } from "lucide-react";
+import { BanknoteArrowDown, Pencil, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -82,7 +82,15 @@ export function ExpenseTable({
                 <Card className="p-4 sm:p-6">
                     <div className="space-y-4">
                         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-                            <h3>Expenses</h3>
+                            <div className="flex items-center gap-2">
+                                <motion.div
+                                    animate={{ y: [0, -3, 0] }}
+                                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                >
+                                    <BanknoteArrowDown className="size-5 text-primary" />
+                                </motion.div>
+                                <h3>Expenses</h3>
+                            </div>
                             <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
                                 <span className="text-sm text-muted-foreground whitespace-nowrap">Filter by month:</span>
                                 <Select value={selectedMonth} onValueChange={setSelectedMonth}>

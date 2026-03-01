@@ -31,13 +31,15 @@ export const CATEGORIES = [
 
 export const CATEGORIES_SORTED = [...CATEGORIES].sort((a, b) => a.category.localeCompare(b.category));
 
-export type ExpenseCategories = (typeof CATEGORIES)[number]['category'];
+export type CustomCategory = string
+export type PresetCategory = (typeof CATEGORIES)[number]['category']
+export type ExpenseCategory = PresetCategory | CustomCategory;
 
 export interface Expense {
     id: string;
     amount: number;
     date: string;
-    category: ExpenseCategories;
+    category: ExpenseCategory;
     description: string;
 }
 
