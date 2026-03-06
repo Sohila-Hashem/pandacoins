@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pencil, Trash2, Check, X, Tag } from "lucide-react";
+import { Pencil, Trash2, Check, X, Tag, BookAlertIcon } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,8 +34,6 @@ export function CustomCategoriesManager({
     const [dialogOpen, setDialogOpen] = useState(false);
     const [newCategoryInput, setNewCategoryInput] = useState("");
     const [newCategoryError, setNewCategoryError] = useState("");
-
-    if (customCategories.length === 0) return null;
 
     const handleStartEdit = (category: string) => {
         setEditingCategory(category);
@@ -114,112 +112,121 @@ export function CustomCategoriesManager({
 
                     <div className="space-y-1.5">
                         <AnimatePresence mode="popLayout">
-                            <p className="text-sm text-muted-foreground text-end px-2">Total: {customCategories.length}</p>
-                            {customCategories.map((customCategory) => (
-                                <motion.div
-                                    key={customCategory}
-                                    layout
-                                    initial={{ opacity: 0, y: -10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, x: -20 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="group flex items-center gap-2 rounded-md p-2 bg-muted"
-                                >
-                                    {editingCategory === customCategory ? (
-                                        <div className="flex-1 space-y-1">
-                                            <div className="flex items-center gap-1">
-                                                <Input
-                                                    value={editInput}
-                                                    onChange={(e) => {
-                                                        setEditInput(e.target.value);
-                                                        setEditError("");
-                                                    }}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === "Enter") {
-                                                            e.preventDefault();
-                                                            handleSaveEdit();
-                                                        }
-                                                        if (e.key === "Escape") {
-                                                            handleCancelEdit();
-                                                        }
-                                                    }}
-                                                    className="h-7 text-sm"
-                                                    autoFocus
-                                                />
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-6 w-6 p-0 text-green-600 hover:text-green-700 hover:bg-green-100 dark:hover:bg-green-900/30"
-                                                            onClick={handleSaveEdit}
-                                                            aria-label="Save category name"
-                                                        >
-                                                            <Check className="size-4" />
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent side="top">Save</TooltipContent>
-                                                </Tooltip>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
-                                                            onClick={handleCancelEdit}
-                                                            aria-label="Cancel editing"
-                                                        >
-                                                            <X className="size-4" />
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent side="top">Cancel</TooltipContent>
-                                                </Tooltip>
-                                            </div>
-                                            {editError && (
-                                                <p className="text-xs text-destructive px-1">{editError}</p>
+                            {customCategories.length === 0 ? (
+                                <div className="flex flex-col justify-center items-center text-muted-foreground space-y-1.5 my-5">
+                                    <BookAlertIcon className="w-5 h-6" />
+                                    <p className="italic text-sm text-center">No custom categories yet</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <p className="text-sm text-muted-foreground text-end px-2">Total: {customCategories.length}</p>
+                                    {customCategories.map((customCategory) => (
+                                        <motion.div
+                                            key={customCategory}
+                                            layout
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, x: -20 }}
+                                            transition={{ duration: 0.2 }}
+                                            className="group flex items-center gap-2 rounded-md p-2 bg-muted"
+                                        >
+                                            {editingCategory === customCategory ? (
+                                                <div className="flex-1 space-y-1">
+                                                    <div className="flex items-center gap-1">
+                                                        <Input
+                                                            value={editInput}
+                                                            onChange={(e) => {
+                                                                setEditInput(e.target.value);
+                                                                setEditError("");
+                                                            }}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === "Enter") {
+                                                                    e.preventDefault();
+                                                                    handleSaveEdit();
+                                                                }
+                                                                if (e.key === "Escape") {
+                                                                    handleCancelEdit();
+                                                                }
+                                                            }}
+                                                            className="h-7 text-sm"
+                                                            autoFocus
+                                                        />
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-6 w-6 p-0 text-green-600 hover:text-green-700 hover:bg-green-100 dark:hover:bg-green-900/30"
+                                                                    onClick={handleSaveEdit}
+                                                                    aria-label="Save category name"
+                                                                >
+                                                                    <Check className="size-4" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side="top">Save</TooltipContent>
+                                                        </Tooltip>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                                                                    onClick={handleCancelEdit}
+                                                                    aria-label="Cancel editing"
+                                                                >
+                                                                    <X className="size-4" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side="top">Cancel</TooltipContent>
+                                                        </Tooltip>
+                                                    </div>
+                                                    {editError && (
+                                                        <p className="text-xs text-destructive px-1">{editError}</p>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <span className="flex-1 text-sm truncate">{customCategory}</span>
+                                                    <div className="flex items-center gap-0.5">
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                                                                    onClick={() => handleStartEdit(customCategory)}
+                                                                    aria-label={`Edit ${customCategory} category`}
+                                                                >
+                                                                    <Pencil className="size-4" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side="top">Rename</TooltipContent>
+                                                        </Tooltip>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                                                                    onClick={() => handleDeleteClick(customCategory)}
+                                                                    aria-label={`Delete ${customCategory} category`}
+                                                                >
+                                                                    <Trash2 className="size-4" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side="top">Delete</TooltipContent>
+                                                        </Tooltip>
+                                                    </div>
+                                                </>
                                             )}
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <span className="flex-1 text-sm truncate">{customCategory}</span>
-                                            <div className="flex items-center gap-0.5">
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
-                                                            onClick={() => handleStartEdit(customCategory)}
-                                                            aria-label={`Edit ${customCategory} category`}
-                                                        >
-                                                            <Pencil className="size-4" />
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent side="top">Rename</TooltipContent>
-                                                </Tooltip>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-                                                            onClick={() => handleDeleteClick(customCategory)}
-                                                            aria-label={`Delete ${customCategory} category`}
-                                                        >
-                                                            <Trash2 className="size-4" />
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent side="top">Delete</TooltipContent>
-                                                </Tooltip>
-                                            </div>
-                                        </>
-                                    )}
-                                </motion.div>
-                            ))}
+                                        </motion.div>
+                                    ))}
+                                </>
+                            )}
                         </AnimatePresence>
                     </div>
 

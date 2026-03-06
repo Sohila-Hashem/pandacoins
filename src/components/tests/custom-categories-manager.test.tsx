@@ -21,16 +21,18 @@ describe('CustomCategoriesManager', () => {
         vi.clearAllMocks();
     });
 
-    it('renders null when there are no custom categories', () => {
-        const { container } = render(<CustomCategoriesManager {...defaultProps} customCategories={[]} />);
-        expect(container.firstChild).toBeNull();
+    it('renders empty state when there are no custom categories', () => {
+        render(<CustomCategoriesManager {...defaultProps} customCategories={[]} />);
+        expect(screen.getByText(/No custom categories yet/i)).toBeInTheDocument();
     });
 
     it('renders the list of custom categories', () => {
         render(<CustomCategoriesManager {...defaultProps} />);
         expect(screen.getByText('Category 1')).toBeInTheDocument();
         expect(screen.getByText('Category 2')).toBeInTheDocument();
-        expect(screen.getByText(/Total: 2/i)).toBeInTheDocument();
+        // Check that "Total: 2" appears exactly once
+        const totalElements = screen.getAllByText(/Total: 2/i);
+        expect(totalElements).toHaveLength(1);
     });
 
     it('starts editing when pencil icon is clicked', async () => {
