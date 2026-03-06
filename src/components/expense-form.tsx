@@ -63,7 +63,7 @@ export function ExpenseForm({
 		defaultValues: {
 			description: editingExpense?.description ?? "",
 			amount: editingExpense?.amount ?? undefined,
-			date: editingExpense ? new Date(editingExpense.date) : new Date(),
+			date: editingExpense ? new Date(editingExpense.date) : undefined,
 			category: editingExpense?.category ?? "",
 		},
 	});
@@ -72,7 +72,7 @@ export function ExpenseForm({
 		reset({
 			description: "",
 			amount: undefined,
-			date: new Date(),
+			date: undefined,
 			category: "",
 		});
 	}, [reset]);
@@ -191,7 +191,7 @@ export function ExpenseForm({
 										<PopoverContent className="w-auto p-0" align="start">
 											<Calendar
 												mode="single"
-												selected={field.value ?? ""}
+												selected={field.value}
 												onSelect={field.onChange}
 											/>
 										</PopoverContent>
