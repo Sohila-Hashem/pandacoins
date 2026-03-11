@@ -9,6 +9,16 @@ function checkForDuplicates(newCategory: CustomCategory, customCategories: Expen
     return allCategories.includes(newCategory)
 }
 
+export function getCustomCategories() {
+    try {
+        const data = loadCustomCategories();
+        return { success: true, data };
+    } catch (error) {
+        console.error(error)
+        return { error: error instanceof Error ? error.message : "Failed to load custom categories." }
+    }
+}
+
 export function addCustomCategory(category: string) {
     try {
         if (!category) return { error: "Category name cannot be empty." }
@@ -26,7 +36,7 @@ export function addCustomCategory(category: string) {
         return { success: true }
     } catch (error) {
         console.error(error)
-        return { error: "Failed to add category." }
+        return { error: error instanceof Error ? error.message : "Failed to add category." }
     }
 }
 
@@ -42,7 +52,7 @@ export function deleteCustomCategory(category: string) {
         return { success: true }
     } catch (error) {
         console.error(error)
-        return { error: "Failed to delete category." }
+        return { error: error instanceof Error ? error.message : "Failed to delete category." }
     }
 }
 
@@ -66,6 +76,6 @@ export function updateCustomCategory(oldName: string, newName: string) {
         return { success: true }
     } catch (error) {
         console.error(error)
-        return { error: "Failed to update category." }
+        return { error: error instanceof Error ? error.message : "Failed to update category." }
     }
 }

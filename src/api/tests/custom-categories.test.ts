@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { addCustomCategory, deleteCustomCategory, updateCustomCategory } from '@/api/custom-categories';
+import { addCustomCategory, deleteCustomCategory, getCustomCategories, updateCustomCategory } from '@/api/custom-categories';
 import * as storage from '@/lib/storage';
 
 vi.mock('@/lib/storage', () => ({
@@ -13,6 +13,23 @@ const mockSave = vi.mocked(storage.saveCustomCategories);
 beforeEach(() => {
     vi.clearAllMocks();
     mockLoad.mockReturnValue([]);
+});
+
+// ─── getCustomCategories ─────────────────────────────────────────────────────
+describe('getCustomCategories', () => {
+    it('returns success and data when storage loads successfully', () => {
+        const categories = ['Travel', 'Hobbies'];
+        mockLoad.mockReturnValue(categories);
+        const result = getCustomCategories();
+        expect(result).toEqual({ success: true, data: categories });
+        expect(mockLoad).toHaveBeenCalled();
+    });
+
+    it('returns error when storage fails', () => {
+        mockLoad.mockImplementation(() => { throw new Error('Database error'); });
+        const result = getCustomCategories();
+        expect(result).toEqual({ error: 'Database error' });
+    });
 });
 
 // ─── addCustomCategory ────────────────────────────────────────────────────────
@@ -61,7 +78,7 @@ describe('addCustomCategory', () => {
 
     it('returns error when loadCustomCategories throws', () => {
         mockLoad.mockImplementation(() => { throw new Error('Storage failure'); });
-        expect(addCustomCategory('ValidCategory')).toEqual({ error: 'Failed to add category.' });
+        expect(addCustomCategory('ValidCategory')).toEqual({ error: 'Storage failure' });
     });
 });
 
@@ -101,7 +118,7 @@ describe('deleteCustomCategory', () => {
 
     it('returns error when loadCustomCategories throws', () => {
         mockLoad.mockImplementation(() => { throw new Error('Storage failure'); });
-        expect(deleteCustomCategory('Alpha')).toEqual({ error: 'Failed to delete category.' });
+        expect(deleteCustomCategory('Alpha')).toEqual({ error: 'Storage failure' });
     });
 });
 
@@ -156,6 +173,6 @@ describe('updateCustomCategory', () => {
 
     it('returns error when loadCustomCategories throws', () => {
         mockLoad.mockImplementation(() => { throw new Error('Storage failure'); });
-        expect(updateCustomCategory('OldName', 'NewName')).toEqual({ error: 'Failed to update category.' });
+        expect(updateCustomCategory('OldName', 'NewName')).toEqual({ error: 'Storage failure' });
     });
 });

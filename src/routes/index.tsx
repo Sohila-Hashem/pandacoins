@@ -14,9 +14,9 @@ import { type Currency, CURRENCIES } from "@/lib/constants";
 import { type Expense } from "@/domain/expense";
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { deleteExpense, loadCurrency, loadExpenses, saveCurrency, saveExpenses, updateExpense, loadCustomCategories } from '@/lib/storage';
+import { deleteExpense, loadCurrency, loadExpenses, saveCurrency, saveExpenses, updateExpense } from '@/lib/storage';
 import { v7 as uuid7 } from 'uuid';
-import { addCustomCategory, deleteCustomCategory, updateCustomCategory } from '@/api/custom-categories';
+import { addCustomCategory, deleteCustomCategory, getCustomCategories, updateCustomCategory } from '@/api/custom-categories';
 
 export const Route = createFileRoute('/')({
     component: RouteComponent,
@@ -52,8 +52,12 @@ function RouteComponent() {
             }
         }
 
-        const storedCustomCategories = loadCustomCategories();
-        setCustomCategories(storedCustomCategories);
+        const storedCustomCategories = getCustomCategories();
+        if (storedCustomCategories.success && storedCustomCategories.data) {
+            setCustomCategories(storedCustomCategories.data);
+        } else if (storedCustomCategories.error) {
+            toast.error("Failed to load custom categories");
+        }
 
         setIsInitialized(true);
     }, []);
