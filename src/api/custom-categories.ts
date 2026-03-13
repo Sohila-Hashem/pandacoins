@@ -1,13 +1,5 @@
-import { CATEGORIES_SORTED, type CustomCategory, type ExpenseCategory } from "@/domain/expense"
 import { loadCustomCategories, saveCustomCategories } from "@/lib/storage"
-
-function checkForDuplicates(newCategory: CustomCategory, customCategories: ExpenseCategory[] = []) {
-    const normalizedPresetCategories = CATEGORIES_SORTED.map((category) => category.category)
-    const normalizedCustomCategories = customCategories.map((category) => category)
-
-    const allCategories = [...normalizedPresetCategories, ...normalizedCustomCategories]
-    return allCategories.includes(newCategory)
-}
+import { checkForDuplicates } from "@/domain/custom-categories"
 
 export function getCustomCategories() {
     try {

@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import type { CustomCategory } from "@/domain/custom-categories";
 
 export const CATEGORIES = [
     { category: 'Food' },
@@ -31,7 +32,6 @@ export const CATEGORIES = [
 
 export const CATEGORIES_SORTED = [...CATEGORIES].sort((a, b) => a.category.localeCompare(b.category));
 
-export type CustomCategory = string
 export type PresetCategory = (typeof CATEGORIES)[number]['category']
 export type ExpenseCategory = PresetCategory | CustomCategory;
 
