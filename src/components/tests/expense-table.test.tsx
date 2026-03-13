@@ -141,7 +141,7 @@ describe('ExpenseTable', () => {
         expect(screen.getByText('1 expense')).toBeInTheDocument();
         const totalsRow = screen.getByText(/Total:/i).closest('div');
         // Match the number 50 with any currency symbol prefix
-        expect(totalsRow?.textContent).toMatch(new RegExp(`\\d*\\s*50`));
+        expect(totalsRow?.textContent).toContain(`${mockCurrency.symbol}50`);
     });
 
     it('filters expenses by a custom category', async () => {

@@ -12,14 +12,13 @@ import {
 import { CATEGORIES_SORTED } from "@/domain/expense";
 
 interface CategorySelectProps {
-    value: string;
-    onValueChange: (value: string) => void;
-    customCategories?: string[];
-    /** When true, renders an "All Categories" option as the first item (for filter use-cases) */
-    showAllOption?: boolean;
-    placeholder?: string;
-    id?: string;
-    triggerClassName?: string;
+    readonly value: string;
+    readonly onValueChange: (value: string) => void;
+    readonly customCategories?: string[];
+    readonly showAllOption?: boolean;
+    readonly placeholder?: string;
+    readonly id?: string;
+    readonly triggerClassName?: string;
 }
 
 export function CategorySelect({
