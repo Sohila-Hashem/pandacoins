@@ -11,7 +11,7 @@ const mockLoad = vi.mocked(storage.loadCustomCategories);
 const mockSave = vi.mocked(storage.saveCustomCategories);
 
 beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks(); // Resets both call history and implementations
     mockLoad.mockReturnValue([]);
 });
 
@@ -76,9 +76,15 @@ describe('addCustomCategory', () => {
         expect(mockSave).toHaveBeenCalledWith(['Trimmed']);
     });
 
-    it('returns error when loadCustomCategories throws', () => {
+    it('returns error when storage.loadCustomCategories throws', () => {
         mockLoad.mockImplementation(() => { throw new Error('Storage failure'); });
         expect(addCustomCategory('ValidCategory')).toEqual({ error: 'Storage failure' });
+    });
+
+    it('returns error when storage.saveCustomCategories throws', () => {
+        mockLoad.mockReturnValue([]);
+        mockSave.mockImplementationOnce(() => { throw new Error('Save failed'); });
+        expect(addCustomCategory('Test')).toEqual({ error: 'Save failed' });
     });
 });
 
@@ -116,9 +122,15 @@ describe('deleteCustomCategory', () => {
         expect(mockSave).toHaveBeenCalledWith(['Alpha']);
     });
 
-    it('returns error when loadCustomCategories throws', () => {
+    it('returns error when storage.loadCustomCategories throws', () => {
         mockLoad.mockImplementation(() => { throw new Error('Storage failure'); });
         expect(deleteCustomCategory('Alpha')).toEqual({ error: 'Storage failure' });
+    });
+
+    it('returns error when storage.saveCustomCategories throws', () => {
+        mockLoad.mockReturnValue(['Alpha']);
+        mockSave.mockImplementationOnce(() => { throw new Error('Delete failed'); });
+        expect(deleteCustomCategory('Alpha')).toEqual({ error: 'Delete failed' });
     });
 });
 
@@ -171,8 +183,14 @@ describe('updateCustomCategory', () => {
         expect(mockSave).toHaveBeenCalledWith(['Renamed', 'AlphaExtra', 'Beta']);
     });
 
-    it('returns error when loadCustomCategories throws', () => {
+    it('returns error when storage.loadCustomCategories throws', () => {
         mockLoad.mockImplementation(() => { throw new Error('Storage failure'); });
         expect(updateCustomCategory('OldName', 'NewName')).toEqual({ error: 'Storage failure' });
+    });
+
+    it('returns error when storage.saveCustomCategories throws', () => {
+        mockLoad.mockReturnValue(['Alpha']);
+        mockSave.mockImplementationOnce(() => { throw new Error('Update failed'); });
+        expect(updateCustomCategory('Alpha', 'Renamed')).toEqual({ error: 'Update failed' });
     });
 });

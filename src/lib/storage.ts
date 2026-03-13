@@ -1,4 +1,5 @@
-import type { CustomCategory, Expense } from "@/domain/expense";
+import type { CustomCategory } from "@/domain/custom-categories";
+import type { Expense } from "@/domain/expense";
 import type { Currency } from "@/lib/constants";
 
 const STORAGE_KEYS = {
