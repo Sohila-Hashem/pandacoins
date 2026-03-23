@@ -28,7 +28,7 @@ export function HeroSection() {
                         }}
                     />
 
-                    <img src="/favicon.png" alt="PandaCoins Logo" className="relative w-85 object-contain" />
+                    <img src="/favicon.png" alt="PandaCoins Logo" className="relative w-50 object-contain" />
                 </div>
             </motion.div>
 
