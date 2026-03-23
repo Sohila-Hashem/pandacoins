@@ -114,6 +114,7 @@ npm run dev
 
 - [x] Support for custom categories
 - [x] Allow filtering by category
+- [ ] Cash Flow Snapshot Widget – Homescreen widget showing remaining budget for week/month without opening the app.
 - [ ] Import expenses from a CSV file
 - [ ] Export reports as PDF
 - [ ] Optionally sync expenses and preferences (custom categories, currency, etc.) across devices by creating an account.
