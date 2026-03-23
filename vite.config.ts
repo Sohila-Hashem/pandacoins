@@ -5,6 +5,7 @@ import { devtools } from '@tanstack/devtools-vite'
 import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
+import { VitePWA } from 'vite-plugin-pwa'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import { fileURLToPath, URL } from 'node:url'
 
@@ -16,13 +17,57 @@ export default defineConfig(({ mode }) => {
       __SENTRY_ORG__: JSON.stringify(env.SENTRY_ORG),
       __SENTRY_PROJECT__: JSON.stringify(env.SENTRY_PROJECT),
     },
-    plugins: [devtools(), tanstackRouter({
-      target: 'react',
-      autoCodeSplitting: true,
-    }), viteReact(), tailwindcss(), sentryVitePlugin({
-      org: env.SENTRY_ORG,
-      project: env.SENTRY_PROJECT
-    })],
+    plugins: [
+      devtools(),
+      tanstackRouter({
+        target: 'react',
+        autoCodeSplitting: true,
+      }),
+      viteReact(),
+      tailwindcss(),
+      sentryVitePlugin({
+        org: env.SENTRY_ORG,
+        project: env.SENTRY_PROJECT
+      }),
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['favicon.png', 'robots.txt', 'pwa-192x192.png', 'pwa-512x512.png'],
+        manifest: {
+          name: 'PandaCoins - Expense Tracker',
+          short_name: 'PandaCoins',
+          description: 'Track your daily expenses, visualize spending habits, and gain insights instantly.',
+          theme_color: '#b87856',
+          icons: [
+            {
+              src: 'pwa-192x192.png',
+              sizes: '192x192',
+              type: 'image/png'
+            },
+            {
+              src: 'pwa-512x512.png',
+              sizes: '512x512',
+              type: 'image/png'
+            },
+            {
+              src: 'pwa-512x512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'any'
+            },
+            {
+              src: 'pwa-512x512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'maskable'
+            }
+          ]
+        },
+        devOptions: {
+          enabled: true,
+          type: 'module',
+        }
+      })
+    ],
 
     resolve: {
       alias: {

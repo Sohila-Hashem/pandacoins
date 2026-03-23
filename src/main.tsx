@@ -9,6 +9,10 @@ import { routeTree } from './routeTree.gen'
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
 import * as Sentry from "@sentry/react";
+import { registerSW } from 'virtual:pwa-register'
+
+// Register PWA service worker
+registerSW({ immediate: true })
 
 
 // Initialize Sentry
