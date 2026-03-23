@@ -7,7 +7,7 @@ test.describe('Expense App', () => {
 
     test('should allow adding an expense and persisting it', async ({ page }) => {
         // 1. Verify Home Page Load
-        await expect(page).toHaveTitle(/Where Did My Money Go/i);
+        await expect(page).toHaveTitle(/PandaCoins/i);
 
         // Wait for the form to be ready - finding a key element
         const descriptionInput = page.getByLabel('Description');

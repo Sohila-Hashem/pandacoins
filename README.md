@@ -1,7 +1,7 @@
-# Where Did My Money Go
+# PandaCoins
 
-![CI](https://img.shields.io/github/actions/workflow/status/sohila-hashem/where-did-my-money-go/ci.yml?branch=main&label=CI%20%7C%20Tests&style=flat-square)
-![Coverage](https://img.shields.io/codecov/c/github/sohila-hashem/where-did-my-money-go?style=flat-square)
+![CI](https://img.shields.io/github/actions/workflow/status/sohila-hashem/pandacoins/ci.yml?branch=main&label=CI%20%7C%20Tests&style=flat-square)
+![Coverage](https://img.shields.io/codecov/c/github/sohila-hashem/pandacoins?style=flat-square)
 
 ![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black&style=flat-square)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white&style=flat-square)
@@ -10,16 +10,16 @@
 ![Playwright](https://img.shields.io/badge/Playwright-2EAD33?logo=playwright&logoColor=white&style=flat-square)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-06B6D4?logo=tailwindcss&logoColor=white&style=flat-square)
 
-A minimalistic expense tracker and analyzer that turns your spending into clear monthly and month-to-month insights, so you can finally answer: "Where did my money go?"
+A minimalistic expense tracker and analyzer that turns your spending into clear monthly and month-to-month insights, so you can finally answer: "Where does it all go?" PandaCoins helps you track your coins!
 
 ## Demo
 
-**Live website:** https://where-did-my-money-go.vercel.app/
+**Live website:** https://pandacoins.vercel.app/
 
 
 ## Problem
 
-I have always struggled by the end of every month because I don’t know _where my money went_. Existing expense-tracking apps and platforms are either too complex or not free.
+I have always struggled by the end of every month because I don’t know _where my money went_. PandaCoins was born to solve this. Existing expense-tracking apps and platforms are either too complex or not free.
 
 ## Solution
 
@@ -87,13 +87,13 @@ No backend is currently implemented due to the simplicity of the app and the lac
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/sohila-hashem/where-did-my-money-go.git
+git clone https://github.com/sohila-hashem/pandacoins.git
 ```
 
 2. Navigate to the project directory:
 
 ```bash
-cd where-did-my-money-go
+cd pandacoins
 ```
 
 3. Install dependencies:

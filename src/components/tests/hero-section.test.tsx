@@ -5,7 +5,7 @@ import { describe, it, expect } from 'vitest';
 describe('HeroSection', () => {
     it('renders the main heading correctly', () => {
         render(<HeroSection />);
-        expect(screen.getByText(/Where did my money go\?/i)).toBeInTheDocument();
+        expect(screen.getByText(/PandaCoins/i)).toBeInTheDocument();
     });
 
     it('renders the description text', () => {

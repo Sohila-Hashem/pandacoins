@@ -1,4 +1,3 @@
-import { Wallet } from "lucide-react";
 import { motion } from "motion/react";
 
 export function HeroSection() {
@@ -28,18 +27,8 @@ export function HeroSection() {
                             ease: "easeInOut"
                         }}
                     />
-                    <motion.div
-                        animate={{
-                            y: [0, -10, 0],
-                        }}
-                        transition={{
-                            duration: 2,
-                            repeat: Infinity,
-                            ease: "easeInOut"
-                        }}
-                    >
-                        <Wallet className="relative h-16 w-16 text-primary" />
-                    </motion.div>
+
+                    <img src="/favicon.png" alt="PandaCoins Logo" className="relative w-85 object-contain" />
                 </div>
             </motion.div>
 
@@ -49,10 +38,10 @@ export function HeroSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
             >
-                <h1 className="text-3xl md:text-4xl">Where did my money go?</h1>
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight">PandaCoins</h1>
                 <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                     Track your expenses, discover spending patterns, and finally answer that age-old question:
-                    "Where does it all go?" Spoiler alert: probably coffee and impulse purchases. ☕✨
+                    "Where does it all go?" Spoiler alert: probably bamboo and treats. 🐼️✨
                 </p>
             </motion.div>
 
