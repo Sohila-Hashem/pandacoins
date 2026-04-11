@@ -16,6 +16,7 @@ import { useCustomCategories } from '@/hooks/use-custom-categories';
 import { useCurrency } from '@/hooks/use-currency';
 import { Footer } from '@/components/shared/footer';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Navbar } from '@/components/shared/navbar';
 
 export const Route = createFileRoute('/')({
     component: HomePage,
@@ -95,6 +96,9 @@ function HomePage() {
             </div>
 
             {showConfetti && <Confetti trigger={showConfetti} />}
+
+            {/* Navbar */}
+            <Navbar />
 
             <main className="relative z-10 flex flex-col gap-24 pb-24">
                 {/* Hero Section */}

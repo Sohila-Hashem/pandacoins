@@ -10,3 +10,7 @@ count.txt
 .wrangler
 coverage
 playwright-report
+supabase/.temp
+dev-dist
+temp
+test-results
