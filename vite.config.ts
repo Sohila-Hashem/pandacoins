@@ -96,7 +96,7 @@ export default defineConfig(({ mode }) => {
           "coverage/**",
           "src/main.tsx",
           "src/components/ui/**",
-          "src/components/theme-provider.tsx",
+          "src/components/shared/theme-provider.tsx",
           "src/reportWebVitals.ts",
           "src/routeTree.gen.ts",
           "src/**/__root.tsx",
