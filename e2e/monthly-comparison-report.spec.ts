@@ -13,17 +13,14 @@ const PREVIOUS_MONTH_SELECTED_DAY = '15';
 const ADD_EXPENSE_BUTTON_TEXT = 'Add Expense';
 const DESCRIPTION_INPUT_LABEL = 'Description';
 const AMOUNT_INPUT_LABEL = 'Amount';
-const CATEGORY_INPUT_LABEL = 'Category';
 const DATE_INPUT_LABEL = 'Date';
 const MONTHLY_COMPARISON_CARD_LABEL = 'Monthly Comparison';
 const MONTHLY_COMPARISON_COMPARE_BUTTON_TEXT = 'Compare';
 const MONTHLY_COMPARISON_REPORT_LABEL = 'Comparison Report';
 const MONTHLY_COMPARISON_LOADING_TEXT = 'Crunching the numbers...';
 const GO_TO_PREVIOUS_MONTH_BUTTON_LABEL = 'Go to the Previous Month';
-const NO_EXPENSES_YET_TEXT = 'No expenses found. Start by adding your first expense!';
+const NO_EXPENSES_YET_TEXT = 'No expenses found';
 const NO_EXPENSES_YET_OPTION_TEXT = 'No expenses yet';
-const CURRENCY_SELECTOR_LABEL = 'Currency';
-const USD_OPTION_TEXT = 'US Dollar';
 const USD_SYMBOL = '$';
 
 // Helper to add expense
@@ -34,7 +31,8 @@ const addExpense = async (page: Page, desc: string, amount: string, isPreviousMo
     await page.getByLabel(AMOUNT_INPUT_LABEL).fill(amount);
 
     // Select Category
-    await page.getByRole('combobox', { name: CATEGORY_INPUT_LABEL }).click();
+    const form = page.getByRole('form', { name: /Add Expense/i });
+    await form.getByRole('combobox', { name: /category/i }).click();
     await page.getByRole('option', { name: CATEGORIES[0].category }).click();
 
     // Select Date
@@ -81,13 +79,30 @@ test.describe('Monthly Comparison Report', () => {
         // Clear local storage and reload to ensure clean state
         await page.evaluate(() => localStorage.clear());
         await page.reload();
+        await page.waitForLoadState('networkidle');
 
         // ensure there are no expenses after clearing local storage
         await expect(page.getByText(NO_EXPENSES_YET_TEXT)).toBeVisible();
 
-        // Ensure we are using USD for tests (some tests check for '$')
-        await page.getByRole('combobox', { name: CURRENCY_SELECTOR_LABEL }).click();
-        await page.getByRole('option', { name: USD_OPTION_TEXT }).click();
+        // Open Customization Sheet
+        await page.getByRole('button', { name: /customization/i }).click();
+
+        // Select USD from the list
+        await page.getByRole('button', { name: /USD/ }).click();
+
+        // Close sheet (click outside or escape)
+        await page.keyboard.press('Escape');
+    });
+
+    test('should toggle theme', async ({ page }) => {
+        // Open Customization Sheet
+        const toggleBtn = page.getByRole('button', { name: /customization/i });
+        if (await toggleBtn.count() > 0) {
+            await toggleBtn.click();
+            await page.getByRole('button', { name: 'Dark' }).click();
+            await expect(page.locator('html')).toHaveClass(/dark/);
+            await page.keyboard.press('Escape');
+        }
     });
 
     test('should generate a comparison report for two consecutive months', async ({ page }) => {
@@ -115,7 +130,8 @@ test.describe('Monthly Comparison Report', () => {
         // Add expense ONLY for current month
         await page.getByLabel(DESCRIPTION_INPUT_LABEL).fill('Only Current Expense');
         await page.getByLabel(AMOUNT_INPUT_LABEL).fill('200');
-        await page.getByRole('combobox', { name: CATEGORY_INPUT_LABEL }).click();
+        const form = page.getByRole('form', { name: /Add Expense/i });
+        await form.getByRole('combobox', { name: /category/i }).click();
         await page.getByRole('option', { name: 'Food' }).click(); // Assuming 'Food' exists
 
         await page.getByLabel(DATE_INPUT_LABEL).click();

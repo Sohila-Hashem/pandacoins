@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { format } from "date-fns";
-import { BanknoteArrowDown, Pencil, Trash2 } from "lucide-react";
+import { BanknoteArrowDown, Pencil, Trash2, Inbox } from "lucide-react";
 import { motion } from "motion/react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -81,16 +81,18 @@ export function ExpenseTable({
 
     return (
         <motion.div
+            className="h-full"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, type: "spring", delay: 0.1 }}
         >
             <motion.div
+                className="h-full"
                 whileHover={{ scale: 1.01 }}
                 transition={{ type: "spring", stiffness: 300 }}
             >
-                <Card className="p-4 sm:p-6">
-                    <div className="space-y-4">
+                <Card className="p-4 sm:p-6 h-full flex flex-col">
+                    <div className="space-y-4 flex flex-col h-full">
                         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex items-center gap-2">
                                 <motion.div
@@ -99,33 +101,33 @@ export function ExpenseTable({
                                 >
                                     <BanknoteArrowDown className="size-5 text-primary" />
                                 </motion.div>
-                                <h3>Expenses</h3>
+                                <h3 className="text-lg font-semibold tracking-tight">Expenses</h3>
                             </div>
                             <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
-                                    <span className="text-sm text-muted-foreground whitespace-nowrap">Filter by month:</span>
+                                    <span className="text-sm text-muted-foreground whitespace-nowrap">Month:</span>
                                     <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                                        <SelectTrigger className="w-full sm:w-[160px]">
+                                        <SelectTrigger className="w-full sm:w-[140px]">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="all">All Months</SelectItem>
+                                            <SelectItem value="all">All</SelectItem>
                                             {availableMonths?.map((month) => (
                                                 <SelectItem key={month} value={month}>
-                                                    {format(new Date(month + "-01"), "MMMM yyyy")}
+                                                    {format(new Date(month + "-01"), "MMM yyyy")}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
-                                    <span className="text-sm text-muted-foreground whitespace-nowrap">Filter by category:</span>
+                                    <span className="text-sm text-muted-foreground whitespace-nowrap">Category:</span>
                                     <CategorySelect
                                         value={selectedCategory}
                                         onValueChange={setSelectedCategory}
                                         customCategories={customCategories}
                                         showAllOption
-                                        triggerClassName="w-full sm:w-[180px]"
+                                        triggerClassName="w-full sm:w-[160px]"
                                     />
                                 </div>
                             </div>
@@ -133,58 +135,64 @@ export function ExpenseTable({
 
                         {sortedExpenses.length === 0 ? (
                             <motion.div
-                                className="py-12 text-center text-muted-foreground"
+                                className="flex-1 flex flex-col items-center justify-center text-muted-foreground py-12"
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ duration: 0.5 }}
                             >
-                                No expenses found. Start by adding your first expense!
+                                <div className="p-4 bg-muted/20 rounded-full mb-4">
+                                    <Inbox className="size-10 text-muted-foreground/40" />
+                                </div>
+                                <p className="text-center font-medium">No expenses found</p>
+                                <p className="text-center text-sm max-w-[200px] mt-1">Start by adding your first expense to see it here!</p>
                             </motion.div>
                         ) : (
-                            <>
-                                <div className="rounded-lg border">
-                                    <ScrollArea className="h-56">
+                            <div className="flex-1 flex flex-col min-h-0">
+                                <div className="flex-1 rounded-lg border overflow-hidden">
+                                    <ScrollArea className="h-full">
                                         <ScrollBar orientation="horizontal" />
                                         <Table>
                                             <TableHeader>
-                                                <TableRow>
-                                                    <TableHead className="sticky top-0 bg-card z-10">Date</TableHead>
-                                                    <TableHead className="sticky top-0 bg-card z-10">Description</TableHead>
-                                                    <TableHead className="sticky top-0 bg-card z-10">Category</TableHead>
-                                                    <TableHead className="sticky top-0 bg-card z-10 text-right">Amount</TableHead>
-                                                    <TableHead className="sticky top-0 bg-card z-10 text-right">Actions</TableHead>
+                                                <TableRow className="bg-muted/50">
+                                                    <TableHead className="sticky top-0 bg-muted/50 z-10 backdrop-blur-sm">Date</TableHead>
+                                                    <TableHead className="sticky top-0 bg-muted/50 z-10 backdrop-blur-sm">Description</TableHead>
+                                                    <TableHead className="sticky top-0 bg-muted/50 z-10 backdrop-blur-sm">Category</TableHead>
+                                                    <TableHead className="sticky top-0 bg-muted/50 z-10 backdrop-blur-sm text-right">Amount</TableHead>
+                                                    <TableHead className="sticky top-0 bg-muted/50 z-10 backdrop-blur-sm text-right">Actions</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
                                                 {sortedExpenses.map((expense, _index) => (
-                                                    <TableRow key={expense.id}>
-                                                        <TableCell>
+                                                    <TableRow key={expense.id} className="hover:bg-accent/5 transition-colors">
+                                                        <TableCell className="whitespace-nowrap">
                                                             {format(new Date(expense.date), "MMM dd, yyyy")}
                                                         </TableCell>
-                                                        <TableCell>{expense.description}</TableCell>
+                                                        <TableCell className="max-w-[200px] truncate">{expense.description}</TableCell>
                                                         <TableCell>
-                                                            <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs">
+                                                            <span className="inline-flex items-center rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-xs font-medium">
                                                                 {expense.category}
                                                             </span>
                                                         </TableCell>
-                                                        <TableCell className="text-right">
+                                                        <TableCell className="text-right font-medium">
                                                             {formatCurrency(expense.amount, currency.code)}
                                                         </TableCell>
                                                         <TableCell className="text-right">
-                                                            <div className="flex justify-end gap-2">
+                                                            <div className="flex justify-end gap-1">
                                                                 <Button
-                                                                    size="sm"
+                                                                    size="icon"
                                                                     variant="ghost"
+                                                                    className="h-8 w-8"
                                                                     onClick={() => onEditExpense(expense)}
                                                                 >
                                                                     <Pencil className="h-4 w-4" />
                                                                 </Button>
                                                                 <Button
-                                                                    size="sm"
+                                                                    size="icon"
                                                                     variant="ghost"
+                                                                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                                                                     onClick={() => setDeleteId(expense.id)}
                                                                 >
-                                                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                                                    <Trash2 className="h-4 w-4" />
                                                                 </Button>
                                                             </div>
                                                         </TableCell>
@@ -196,23 +204,22 @@ export function ExpenseTable({
                                 </div>
 
                                 <motion.div
-                                    className="flex justify-between items-center pt-2 border-t"
+                                    className="flex justify-between items-center pt-4 mt-2 border-t"
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     transition={{ delay: 0.3 }}
                                 >
-                                    <span className="text-sm text-muted-foreground">
-                                        {filteredExpenses.length} expense
-                                        {filteredExpenses.length !== 1 ? "s" : ""}
+                                    <span className="text-sm text-muted-foreground font-medium">
+                                        {filteredExpenses.length} transaction{filteredExpenses.length === 1 ? "" : "s"}
                                     </span>
-                                    <div className="text-lg">
-                                        <span className="text-muted-foreground mr-2">Total:</span>
-                                        <span className="font-medium text-primary">
+                                    <div className="text-xl">
+                                        <span className="text-muted-foreground mr-2 text-sm">Total:</span>
+                                        <span className="font-bold text-primary">
                                             {formatCurrency(totalAmount, currency.code)}
                                         </span>
                                     </div>
                                 </motion.div>
-                            </>
+                            </div>
                         )}
                     </div>
 

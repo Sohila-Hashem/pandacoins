@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/components/shared/theme-provider.tsx"
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 
 // Import the generated route tree
@@ -10,6 +10,7 @@ import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
 import * as Sentry from "@sentry/react";
 import { registerSW } from 'virtual:pwa-register'
+import { CurrencyProvider } from '@/hooks/use-currency.tsx'
 
 // Register PWA service worker
 registerSW({ immediate: true })
@@ -60,7 +61,9 @@ if (rootElement && !rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-        <RouterProvider router={router} />
+        <CurrencyProvider>
+          <RouterProvider router={router} />
+        </CurrencyProvider>
       </ThemeProvider>
     </StrictMode>,
   )

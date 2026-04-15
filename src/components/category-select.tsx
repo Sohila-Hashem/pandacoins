@@ -32,7 +32,7 @@ export function CategorySelect({
 }: CategorySelectProps) {
     return (
         <Select value={value} onValueChange={onValueChange}>
-            <SelectTrigger id={id} className={triggerClassName}>
+            <SelectTrigger id={id} className={triggerClassName} aria-label={placeholder}>
                 <SelectValue aria-label="Select category" placeholder={placeholder} />
             </SelectTrigger>
             <SelectContent>

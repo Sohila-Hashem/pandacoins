@@ -2,29 +2,27 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { HeroSection } from "@/components/hero-section";
-import { CurrencySelector } from "@/components/currency-selector";
-import { ModeToggle } from "@/components/mode-toggle";
 import { ExpenseForm } from "@/components/expense-form";
 import { ExpenseTable } from "@/components/expense-table";
 import { MonthlyReport } from "@/components/monthly-report";
 import { MonthComparison } from "@/components/month-comparison";
-import { Confetti } from "@/components/confetti";
+import { Confetti } from "@/components/shared/confetti";
 import { CustomCategoriesManager } from "@/components/custom-categories-manager";
-import { type Currency, CURRENCIES } from "@/lib/constants";
+import { FeaturesHighlight } from "@/components/features-highlight";
 import { type Expense } from "@/domain/expense";
-import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
-import { deleteExpense, loadCurrency, loadExpenses, saveCurrency, saveExpenses, updateExpense } from '@/lib/storage';
+import { deleteExpense, loadExpenses, saveExpenses, updateExpense } from '@/lib/storage';
 import { v7 as uuid7 } from 'uuid';
 import { useCustomCategories } from '@/hooks/use-custom-categories';
+import { useCurrency } from '@/hooks/use-currency';
+import { Footer } from '@/components/shared/footer';
 
 export const Route = createFileRoute('/')({
-    component: RouteComponent,
+    component: HomePage,
 })
 
-function RouteComponent() {
+function HomePage() {
+    const { currency } = useCurrency();
     const [expenses, setExpenses] = useState<Expense[]>([]);
-    const [currency, setCurrency] = useState<Currency>(CURRENCIES[0]);
     const [editingExpense, setEditingExpense] = useState<Expense | undefined>();
     const [showConfetti, setShowConfetti] = useState(false);
     const [isInitialized, setIsInitialized] = useState(false);
@@ -32,15 +30,9 @@ function RouteComponent() {
     // Load from localStorage on mount
     useEffect(() => {
         const storedExpenses = loadExpenses();
-        const storedCurrency = loadCurrency();
 
         if (storedExpenses) {
             setExpenses(storedExpenses);
-        }
-
-        if (storedCurrency) {
-            const found = CURRENCIES.find((c) => c.code === storedCurrency.code);
-            if (found) setCurrency(found);
         }
 
         setIsInitialized(true);
@@ -51,12 +43,6 @@ function RouteComponent() {
         if (!isInitialized) return;
         saveExpenses(expenses);
     }, [expenses, isInitialized]);
-
-    // Save to localStorage when currency changes
-    useEffect(() => {
-        if (!isInitialized) return;
-        saveCurrency(currency);
-    }, [currency, isInitialized]);
 
 
     const { update: hookUpdateCustomCategory, customCategories } = useCustomCategories();
@@ -94,72 +80,91 @@ function RouteComponent() {
 
     const handleEditExpense = (expense: Expense) => {
         setEditingExpense(expense);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        const element = document.getElementById("manage-expenses");
+        element?.scrollIntoView({ behavior: "smooth" });
     };
 
     return (
-        <div className="min-h-screen bg-background relative overflow-x-hidden">
+        <div className="min-h-screen bg-background relative overflow-x-hidden scroll-smooth">
             {/* Animated background elements */}
-            <div className="fixed inset-0 pointer-events-none opacity-100">
-                <div className="absolute top-20 left-10 w-72 h-72 bg-primary/50 dark:bg-primary/30 rounded-full blur-3xl opacity-50 dark:opacity-100" />
-                <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/50 dark:bg-accent/30 rounded-full blur-3xl opacity-50 dark:opacity-100" />
-                <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-secondary/50 dark:bg-secondary/30 rounded-full blur-3xl opacity-50 dark:opacity-100" />
+            <div className="fixed inset-0 pointer-events-none opacity-60 dark:opacity-40 overflow-hidden">
+                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/30 rounded-full blur-[120px] " />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-accent/30 rounded-full blur-[120px]" />
+                <div className="absolute top-[30%] left-[40%] w-[30%] h-[30%] bg-secondary/20 rounded-full blur-[100px]" />
             </div>
 
             {showConfetti && <Confetti trigger={showConfetti} />}
 
-            <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
+            <main className="relative z-10 flex flex-col gap-24 pb-24">
                 {/* Hero Section */}
-                <HeroSection />
-
-                {/* Currency Selector and Mode Toggle */}
-                <div className="flex justify-end mb-6 gap-2">
-                    <CurrencySelector currency={currency} onCurrencyChange={setCurrency} />
-                    <ModeToggle />
+                <div id="home" className="container mx-auto px-4">
+                    <HeroSection />
                 </div>
 
-                {/* Main Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Left Column - Form */}
-                    <div className="lg:col-span-1 space-y-6">
-                        <ExpenseForm
-                            onAddExpense={handleAddExpense}
-                            editingExpense={editingExpense}
-                            onUpdateExpense={handleUpdateExpense}
-                            onCancelEdit={() => setEditingExpense(undefined)}
-                            currency={currency}
-                        />
-                        <CustomCategoriesManager onUpdateCustomCategory={handleUpdateCustomCategory} />
+                {/* Features Section */}
+                <div id="features" className="bg-accent/5 py-8">
+                    <FeaturesHighlight />
+                </div>
+
+                {/* Management & History Section */}
+                <section id="manage-expenses" className="container mx-auto px-4 max-w-7xl scroll-mt-24">
+                    <div className="grid grid-cols-12 gap-8 items-stretch">
+                        {/* Sidebar: Form & Categories */}
+                        <div className="col-span-12 lg:col-span-4 space-y-8 flex flex-col">
+                            <div className="space-y-4 text-center md:text-left">
+                                <h2 className="text-3xl font-bold tracking-tight">Management</h2>
+                                <p className="text-muted-foreground text-sm leading-relaxed">
+                                    Record your transactions and organize your custom categories.
+                                </p>
+                            </div>
+                            <div className="flex-1 flex flex-col gap-8">
+                                <ExpenseForm
+                                    onAddExpense={handleAddExpense}
+                                    editingExpense={editingExpense}
+                                    onUpdateExpense={handleUpdateExpense}
+                                    onCancelEdit={() => setEditingExpense(undefined)}
+                                    currency={currency}
+                                />
+                                <CustomCategoriesManager onUpdateCustomCategory={handleUpdateCustomCategory} />
+                            </div>
+                        </div>
+
+                        {/* Main: Table */}
+                        <div className="col-span-12 lg:col-span-8 flex flex-col">
+                            <div id="history" className="space-y-4 mb-4 text-center md:text-left">
+                                <h2 className="text-3xl font-bold tracking-tight">Transactions</h2>
+                                <p className="text-muted-foreground text-sm">Review and manage your spending history.</p>
+                            </div>
+                            <div className="flex-1">
+                                <ExpenseTable
+                                    expenses={expenses}
+                                    onDeleteExpense={handleDeleteExpense}
+                                    onEditExpense={handleEditExpense}
+                                    currency={currency}
+                                    customCategories={customCategories}
+                                />
+                            </div>
+                        </div>
                     </div>
+                </section>
 
-                    {/* Right Column - Table and Insights */}
-                    <div className="lg:col-span-2 space-y-6">
-                        <ExpenseTable
-                            expenses={expenses}
-                            onDeleteExpense={handleDeleteExpense}
-                            onEditExpense={handleEditExpense}
-                            currency={currency}
-                            customCategories={customCategories}
-                        />
-
-                        <div className="grid md:grid-cols-2 gap-6">
+                {/* Insights Section */}
+                <section id="insights" className="container mx-auto px-4 max-w-7xl">
+                    <div className="space-y-8">
+                        <div className="space-y-2 text-center md:text-left">
+                            <h2 className="text-3xl font-bold tracking-tight">Financial Insights</h2>
+                            <p className="text-muted-foreground">Detailed breakdown and intelligent comparisons.</p>
+                        </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
                             <MonthlyReport expenses={expenses} currency={currency} />
                             <MonthComparison expenses={expenses} currency={currency} />
                         </div>
                     </div>
-                </div>
+                </section>
+            </main>
 
-                {/* Footer */}
-                <div className="mt-12 text-center text-sm text-muted-foreground max-w-xl mx-auto">
-                    <p>Your data is stored locally in your browser. No servers, no tracking. 🔒</p>
-                    <Separator decorative className="mt-3 w-1/2 mx-auto" />
-                    <p>Built with ❤️ by
-                        <Button className='px-1 py-0' variant={"link"} asChild>
-                            <a href="https://github.com/sohila-hashem" target="_blank">Sohila Hashem</a>
-                        </Button>
-                    </p>
-                </div>
-            </div>
+            {/* Footer */}
+            <Footer />
         </div>
     );
 }

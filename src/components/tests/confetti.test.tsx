@@ -1,5 +1,5 @@
 import { render, act } from '@testing-library/react';
-import { Confetti } from '@/components/confetti';
+import { Confetti } from '@/components/shared/confetti';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 describe('Confetti', () => {
@@ -12,28 +12,48 @@ describe('Confetti', () => {
         vi.useRealTimers();
     });
 
-    it('renders nothing initially when trigger is false', () => {
+    it('renders nothing when trigger is false', () => {
         const { container } = render(<Confetti trigger={false} />);
         expect(container).toBeEmptyDOMElement();
     });
 
-    it('renders confetti pieces when trigger is true', () => {
+    it('renders 120 confetti pieces when trigger is true', () => {
         const { container } = render(<Confetti trigger={true} />);
-        // It renders a div with class 'fixed inset-0...' and children
-        // We can check if the container has a child
-        expect(container.firstChild).toHaveClass('fixed inset-0');
-        // It should render 30 pieces
-        expect(container.firstChild?.childNodes.length).toBe(30);
+        expect(container.firstChild).toHaveClass('fixed');
+        expect(container.firstChild?.childNodes.length).toBe(120);
     });
 
-    it('cleans up after 3000ms', () => {
+    it('renders the wrapper with pointer-events-none so it does not block UI', () => {
+        const { container } = render(<Confetti trigger={true} />);
+        expect(container.firstChild).toHaveClass('pointer-events-none');
+    });
+
+    it('clears pieces after 5000ms', () => {
         const { container } = render(<Confetti trigger={true} />);
         expect(container).not.toBeEmptyDOMElement();
 
         act(() => {
-            vi.advanceTimersByTime(3000);
+            vi.advanceTimersByTime(5000);
         });
 
         expect(container).toBeEmptyDOMElement();
+    });
+
+    it('does not clear pieces before 5000ms', () => {
+        const { container } = render(<Confetti trigger={true} />);
+
+        act(() => {
+            vi.advanceTimersByTime(4999);
+        });
+
+        expect(container).not.toBeEmptyDOMElement();
+    });
+
+    it('re-triggers when trigger flips from false to true', () => {
+        const { container, rerender } = render(<Confetti trigger={false} />);
+        expect(container).toBeEmptyDOMElement();
+
+        rerender(<Confetti trigger={true} />);
+        expect(container.firstChild?.childNodes.length).toBe(120);
     });
 });

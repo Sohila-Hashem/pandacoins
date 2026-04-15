@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Expense App', () => {
     test.beforeEach(async ({ page }) => {
         await page.goto('/');
+        await page.waitForLoadState('networkidle');
     });
 
     test('should allow adding an expense and persisting it', async ({ page }) => {
@@ -10,7 +11,8 @@ test.describe('Expense App', () => {
         await expect(page).toHaveTitle(/PandaCoins/i);
 
         // Wait for the form to be ready - finding a key element
-        const descriptionInput = page.getByLabel('Description');
+        const form = page.getByRole('form', { name: /Add Expense/i });
+        const descriptionInput = form.getByLabel('Description');
         await expect(descriptionInput).toBeVisible();
 
         // 2. Add Expense
@@ -27,8 +29,8 @@ test.describe('Expense App', () => {
         // Find the "Category" label, then find the combobox associated or near it.
         // Assuming the structure is: label + div > combobox
         // Let's use the form locator context.
-        const form = page.locator('form');
-        const categoryTrigger = form.getByRole('combobox');
+        // Find the "Category" combobox. 
+        const categoryTrigger = form.getByRole('combobox', { name: /Select category/i });
 
         await expect(categoryTrigger).toBeVisible();
         await categoryTrigger.click();
@@ -71,13 +73,13 @@ test.describe('Expense App', () => {
     });
 
     test('should toggle theme', async ({ page }) => {
-        // Assuming ModeToggle is present (Sun/Moon icon or button)
-        // Usually has aria-label "Toggle theme"
-        const toggleBtn = page.getByRole('button', { name: /toggle theme/i });
+        // Open Customization Sheet
+        const toggleBtn = page.getByRole('button', { name: /customization/i });
         if (await toggleBtn.count() > 0) {
             await toggleBtn.click();
-            await page.getByRole('menuitem', { name: 'Dark' }).click();
+            await page.getByRole('button', { name: 'Dark' }).click();
             await expect(page.locator('html')).toHaveClass(/dark/);
+            await page.keyboard.press('Escape');
         }
     });
 });

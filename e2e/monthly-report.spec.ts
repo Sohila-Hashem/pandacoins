@@ -12,7 +12,7 @@ test.describe('Monthly Report', () => {
         const description = 'Report Test Expense';
         await form.getByLabel('Description').fill(description);
         await form.getByLabel('Amount').fill('1500');
-        await form.getByLabel('Category', { exact: true }).click();
+        await form.getByRole('combobox', { name: /category/i }).click();
         await page.getByRole('option', { name: 'Food' }).click();
 
         // Pick date (today)

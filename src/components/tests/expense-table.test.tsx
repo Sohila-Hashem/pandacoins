@@ -73,8 +73,8 @@ describe('ExpenseTable', () => {
             />
         );
 
-        expect(screen.getByText('Filter by month:')).toBeInTheDocument();
-        expect(screen.getByText('Filter by category:')).toBeInTheDocument();
+        expect(screen.getByText('Month:')).toBeInTheDocument();
+        expect(screen.getByText('Category:')).toBeInTheDocument();
     });
 
     it('filters expenses by month', async () => {
@@ -96,8 +96,7 @@ describe('ExpenseTable', () => {
         const [monthSelect] = screen.getAllByRole('combobox');
         await user.click(monthSelect);
 
-        // Find October 2023 option
-        const octoberOption = await screen.findByText('October 2023');
+        const octoberOption = await screen.findByText('Oct 2023');
         await user.click(octoberOption);
 
         // Verify filtering
@@ -137,8 +136,8 @@ describe('ExpenseTable', () => {
         expect(screen.queryByText('Rent')).not.toBeInTheDocument();
         expect(screen.queryByText('Cinema')).not.toBeInTheDocument();
 
-        // 1 expense left, total should be the amount of the remaining expense
-        expect(screen.getByText('1 expense')).toBeInTheDocument();
+        // 1 transaction left, total should be the amount of the remaining expense
+        expect(screen.getByText('1 transaction')).toBeInTheDocument();
         const totalsRow = screen.getByText(/Total:/i).closest('div');
         // Match the number 50 with any currency symbol prefix
         expect(totalsRow?.textContent).toContain(`${mockCurrency.symbol}50`);
@@ -221,7 +220,7 @@ describe('ExpenseTable', () => {
 
         // Filter by October
         await user.click(monthSelect);
-        await user.click(await screen.findByText('October 2023'));
+        await user.click(await screen.findByText('Oct 2023'));
 
         // Filter by Food
         await user.click(categorySelect);

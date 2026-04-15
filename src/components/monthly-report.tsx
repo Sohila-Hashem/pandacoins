@@ -1,20 +1,13 @@
 import { useState, useMemo } from "react";
-import { format } from "date-fns";
 import { FileText, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { LoadingSpinner } from "@/components/loading-spinner";
 import { type Currency } from "@/lib/constants";
 import { type Expense, getAvailableMonths } from "@/domain/expense";
 import { generateMonthlyReport } from "@/domain/aggregate";
+import { MonthSelector } from "./month-selector";
 
 interface MonthlyReportProps {
     expenses: Expense[];
@@ -48,6 +41,7 @@ export function MonthlyReport({ expenses, currency }: MonthlyReportProps) {
 
     return (
         <motion.div
+            className="h-full"
             role="region"
             aria-label="Monthly Report"
             initial={{ opacity: 0, scale: 0.95 }}
@@ -55,10 +49,11 @@ export function MonthlyReport({ expenses, currency }: MonthlyReportProps) {
             transition={{ duration: 0.5, delay: 0.2 }}
         >
             <motion.div
+                className="h-full"
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300 }}
             >
-                <Card className="p-4 sm:p-6">
+                <Card className="p-4 sm:p-6 h-full flex flex-col">
                     <div className="space-y-4">
                         <motion.div
                             className="flex items-center gap-2"
@@ -75,25 +70,12 @@ export function MonthlyReport({ expenses, currency }: MonthlyReportProps) {
                             <h2 className="text-lg font-semibold">Monthly Report</h2>
                         </motion.div>
 
+                        <p className="text-sm text-muted-foreground">
+                            Get a detailed breakdown of your spending for the selected month.
+                        </p>
+
                         <div className="flex flex-col sm:flex-row gap-3">
-                            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                                <SelectTrigger className="flex-1" aria-label="Select a month">
-                                    <SelectValue placeholder="Select a month" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {availableMonths.length === 0 ? (
-                                        <SelectItem value="none" disabled>
-                                            No expenses yet
-                                        </SelectItem>
-                                    ) : (
-                                        availableMonths.map((month) => (
-                                            <SelectItem key={month} value={month}>
-                                                {format(new Date(month + "-01"), "MMMM yyyy")}
-                                            </SelectItem>
-                                        ))
-                                    )}
-                                </SelectContent>
-                            </Select>
+                            <MonthSelector availableMonths={availableMonths} selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth} />
 
                             <Button
                                 onClick={handleGenerateReport}

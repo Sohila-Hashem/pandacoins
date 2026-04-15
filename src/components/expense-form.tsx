@@ -28,6 +28,7 @@ interface ExpenseFormProps {
 	onUpdateExpense?: (expense: Expense) => void;
 	onCancelEdit?: () => void;
 	currency: Currency;
+	className?: string;
 }
 
 export function ExpenseForm({
@@ -36,6 +37,7 @@ export function ExpenseForm({
 	onAddExpense,
 	onUpdateExpense,
 	onCancelEdit,
+	className,
 }: ExpenseFormProps) {
 	const { customCategories, add: onAddCustomCategory } = useCustomCategories();
 	const [dialogOpen, setDialogOpen] = useState(false);
@@ -110,15 +112,17 @@ export function ExpenseForm({
 
 	return (
 		<motion.div
+			className={cn("h-full", className)}
 			initial={{ opacity: 0, x: -50 }}
 			animate={{ opacity: 1, x: 0 }}
-			transition={{ duration: 0.5, type: "spring" }}
+			transition={{ duration: 0.5, type: "spring", delay: 0.1 }}
 		>
 			<motion.div
+				className="h-full"
 				whileHover={{ scale: 1.02 }}
 				transition={{ type: "spring", stiffness: 300 }}
 			>
-				<Card className="p-6">
+				<Card className="p-4 h-full flex flex-col justify-center">
 					<form role="form" aria-label="Add Expense" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 						<div className="space-y-2">
 							<Label htmlFor="description">Description</Label>

@@ -96,15 +96,17 @@ export function CustomCategoriesManager({ onUpdateCustomCategory }: CustomCatego
 
     return (
         <motion.div
+            className="h-full"
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, type: "spring", delay: 0.1 }}
         >
             <motion.div
+                className="h-full"
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300 }}
             >
-                <Card className="p-4">
+                <Card className="p-4 h-full flex flex-col">
                     <div className="flex flex-col space-y-1 px-2">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
