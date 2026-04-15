@@ -130,7 +130,7 @@ function HomePage() {
                         </div>
 
                         {/* Main: Table */}
-                        <div className="col-span-12 lg:col-span-8 flex flex-col min-h-0 overflow-hidden">
+                        <div className="col-span-12 h-[560px] lg:h-auto lg:col-span-8 flex flex-col min-h-0 overflow-hidden">
                             <div id="history" className="space-y-4 mb-4 text-center md:text-left">
                                 <h2 className="text-3xl font-bold tracking-tight">Transactions</h2>
                                 <p className="text-muted-foreground text-sm">Review and manage your spending history.</p>
