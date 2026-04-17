@@ -2,11 +2,11 @@ import type { CustomCategory } from "@/domain/custom-categories";
 import type { Expense } from "@/domain/expense";
 import type { Currency } from "@/lib/constants";
 
-const STORAGE_KEYS = {
+export const STORAGE_KEYS = Object.freeze({
     EXPENSES: "expenses",
     CURRENCY: "currency",
     CUSTOM_CATEGORIES: "custom_categories",
-};
+});
 
 export const saveExpenses = (expenses: Expense[]) => {
     localStorage.setItem(STORAGE_KEYS.EXPENSES, JSON.stringify(expenses));

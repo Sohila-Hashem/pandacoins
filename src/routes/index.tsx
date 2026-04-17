@@ -15,6 +15,7 @@ import { v7 as uuid7 } from 'uuid';
 import { useCustomCategories } from '@/hooks/use-custom-categories';
 import { useCurrency } from '@/hooks/use-currency';
 import { Footer } from '@/components/shared/footer';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export const Route = createFileRoute('/')({
     component: HomePage,
@@ -108,34 +109,42 @@ function HomePage() {
 
                 {/* Management & History Section */}
                 <section id="manage-expenses" className="container mx-auto px-4 max-w-7xl scroll-mt-24">
-                    <div className="grid grid-cols-12 gap-8 items-stretch">
-                        {/* Sidebar: Form & Categories */}
-                        <div className="col-span-12 lg:col-span-4 space-y-8 flex flex-col">
-                            <div className="space-y-4 text-center md:text-left">
+                    <div className="grid grid-cols-12 gap-8 lg:grid-rows-5 lg:h-[850px] items-stretch">
+                        {/* Sidebar: Form Area (3 rows) */}
+                        <div className="col-span-12 lg:col-span-4 lg:row-span-3 lg:col-start-1 lg:row-start-1 flex flex-col min-h-0 space-y-4 max-h-[500px] lg:max-h-none">
+                            <div className="space-y-4 text-center md:text-left shrink-0">
                                 <h2 className="text-3xl font-bold tracking-tight">Management</h2>
                                 <p className="text-muted-foreground text-sm leading-relaxed">
-                                    Record your transactions and organize your custom categories.
+                                    Record your transactions.
                                 </p>
                             </div>
-                            <div className="flex-1 flex flex-col gap-8">
-                                <ExpenseForm
-                                    onAddExpense={handleAddExpense}
-                                    editingExpense={editingExpense}
-                                    onUpdateExpense={handleUpdateExpense}
-                                    onCancelEdit={() => setEditingExpense(undefined)}
-                                    currency={currency}
-                                />
-                                <CustomCategoriesManager onUpdateCustomCategory={handleUpdateCustomCategory} />
+                            <div className="flex-1 min-h-0">
+                                <ScrollArea className="h-full">
+                                    <ExpenseForm
+                                        onAddExpense={handleAddExpense}
+                                        editingExpense={editingExpense}
+                                        onUpdateExpense={handleUpdateExpense}
+                                        onCancelEdit={() => setEditingExpense(undefined)}
+                                        currency={currency}
+                                    />
+                                </ScrollArea>
                             </div>
                         </div>
 
-                        {/* Main: Table */}
-                        <div className="col-span-12 lg:col-span-8 flex flex-col">
-                            <div id="history" className="space-y-4 mb-4 text-center md:text-left">
-                                <h2 className="text-3xl font-bold tracking-tight">Transactions</h2>
-                                <p className="text-muted-foreground text-sm">Review and manage your spending history.</p>
+                        {/* Sidebar: Categories Area (2 rows) */}
+                        <div className="col-span-12 lg:col-span-4 lg:row-span-2 lg:col-start-1 lg:row-start-4 flex flex-col min-h-0 max-h-[400px] lg:max-h-none">
+                            <CustomCategoriesManager onUpdateCustomCategory={handleUpdateCustomCategory} />
+                        </div>
+
+                        {/* Main: Table Area (5 rows) */}
+                        <div className="col-span-12 lg:col-span-8 lg:row-span-5 lg:col-start-5 lg:row-start-1 flex flex-col min-h-0 space-y-4 max-h-[800px] lg:max-h-none">
+                            <div id="history" className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 shrink-0">
+                                <div className="space-y-4 text-center md:text-left">
+                                    <h2 className="text-3xl font-bold tracking-tight">Transactions</h2>
+                                    <p className="text-muted-foreground text-sm">Review your spending history.</p>
+                                </div>
                             </div>
-                            <div className="flex-1">
+                            <div className="flex-1 min-h-0">
                                 <ExpenseTable
                                     expenses={expenses}
                                     onDeleteExpense={handleDeleteExpense}
