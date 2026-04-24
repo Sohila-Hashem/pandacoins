@@ -44,8 +44,8 @@ export function ImportOptionsDialog({ isOpen, onClose, onConfirm, fileName }: Im
                             <button
                                 onClick={() => setMode('append')}
                                 className={`flex flex-col items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all duration-300 group ${mode === 'append'
-                                        ? 'border-primary bg-primary/5 ring-4 ring-primary/10'
-                                        : 'border-border/50 hover:border-border hover:bg-accent/50'
+                                    ? 'border-primary bg-primary/5 ring-4 ring-primary/10'
+                                    : 'border-border/50 hover:border-border hover:bg-accent/50'
                                     }`}
                             >
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${mode === 'append' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
@@ -61,8 +61,8 @@ export function ImportOptionsDialog({ isOpen, onClose, onConfirm, fileName }: Im
                             <button
                                 onClick={() => setMode('overwrite')}
                                 className={`flex flex-col items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all duration-300 group ${mode === 'overwrite'
-                                        ? 'border-destructive/50 bg-destructive/5 ring-4 ring-destructive/10'
-                                        : 'border-border/50 hover:border-border hover:bg-accent/50'
+                                    ? 'border-destructive/50 bg-destructive/5 ring-4 ring-destructive/10'
+                                    : 'border-border/50 hover:border-border hover:bg-accent/50'
                                     }`}
                             >
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${mode === 'overwrite' ? 'bg-destructive text-destructive-foreground' : 'bg-muted text-muted-foreground'
@@ -77,17 +77,51 @@ export function ImportOptionsDialog({ isOpen, onClose, onConfirm, fileName }: Im
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 p-4 rounded-2xl bg-accent/20 border border-border/50 cursor-pointer select-none group transition-colors hover:bg-accent/30"
-                        onClick={() => setAddCategories(!addCategories)}>
-                        <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-300 ${addCategories ? 'bg-primary border-primary' : 'border-muted-foreground/30'
-                            }`}>
-                            {addCategories && <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="text-primary-foreground"><path d="M20 6 9 17l-5-5" /></svg>}
+                    <button
+                        type="button"
+                        aria-pressed={addCategories}
+                        aria-label={
+                            addCategories
+                                ? "Disable auto-add missing categories"
+                                : "Enable auto-add missing categories"
+                        }
+                        onClick={() => setAddCategories((prev) => !prev)}
+                        className="w-full flex items-center gap-3 p-4 rounded-2xl bg-accent/20 border border-border/50 select-none group transition-colors hover:bg-accent/30 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                    >
+                        <div
+                            aria-hidden="true"
+                            className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-300 ${addCategories
+                                ? "bg-primary border-primary"
+                                : "border-muted-foreground/30"
+                                }`}
+                        >
+                            {addCategories && (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="text-primary-foreground"
+                                >
+                                    <path d="M20 6 9 17l-5-5" />
+                                </svg>
+                            )}
                         </div>
-                        <div className="flex-1">
-                            <div className="font-semibold text-sm">Auto-add missing categories</div>
-                            <p className="text-[11px] text-muted-foreground leading-tight">Create custom categories if they don't exist</p>
+
+                        <div className="flex-1 text-left">
+                            <div className="font-semibold text-sm">
+                                Auto-add missing categories
+                            </div>
+                            <p className="text-[11px] text-muted-foreground leading-tight">
+                                Create custom categories if they don't exist
+                            </p>
                         </div>
-                    </div>
+                    </button>
                 </div>
 
                 <DialogFooter className="gap-2 sm:gap-0">
