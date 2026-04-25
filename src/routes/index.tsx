@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { HeroSection } from "@/components/hero-section";
 import { ExpenseForm } from "@/components/expense-form";
@@ -9,7 +9,8 @@ import { MonthComparison } from "@/components/month-comparison";
 import { Confetti } from "@/components/shared/confetti";
 import { CustomCategoriesManager } from "@/components/custom-categories-manager";
 import { FeaturesHighlight } from "@/components/features-highlight";
-import { type Expense } from "@/domain/expense";
+import { filterExpensesByMonth, filterExpensesByCategory, type Expense, EXPENSE_EXPORT_DATE_FORMAT } from "@/domain/expense";
+import { format } from 'date-fns';
 import { deleteExpense, loadExpenses, saveExpenses, updateExpense } from '@/lib/storage';
 import { v7 as uuid7 } from 'uuid';
 import { useCustomCategories } from '@/hooks/use-custom-categories';
@@ -28,6 +29,9 @@ function HomePage() {
     const [editingExpense, setEditingExpense] = useState<Expense | undefined>();
     const [showConfetti, setShowConfetti] = useState(false);
     const [isInitialized, setIsInitialized] = useState(false);
+
+    const [selectedMonth, setSelectedMonth] = useState<string>("all");
+    const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
     // Load from localStorage on mount
     useEffect(() => {
@@ -48,6 +52,24 @@ function HomePage() {
 
 
     const { update: hookUpdateCustomCategory, customCategories, refresh: refreshCustomCategories } = useCustomCategories();
+
+    const filteredExpenses = useMemo(() => {
+        let result = expenses;
+        if (selectedMonth !== "all") {
+            result = filterExpensesByMonth(result, selectedMonth);
+        }
+        if (selectedCategory !== "all") {
+            result = filterExpensesByCategory(result, selectedCategory);
+        }
+        return result;
+    }, [expenses, selectedMonth, selectedCategory]);
+
+    const exportFileName = useMemo(() => {
+        const dateSegment = selectedMonth !== "all" ? selectedMonth : format(new Date(), EXPENSE_EXPORT_DATE_FORMAT);
+        let name = `expenses-${dateSegment}`;
+        if (selectedCategory !== "all") name += `-${selectedCategory.replaceAll(/\s+/g, '_').toLowerCase()}`;
+        return `${name}.csv`;
+    }, [selectedMonth, selectedCategory]);
 
     const handleUpdateCustomCategory = (oldName: string, newName: string) => {
         hookUpdateCustomCategory(oldName, newName);
@@ -115,9 +137,9 @@ function HomePage() {
 
                 {/* Management & History Section */}
                 <section id="manage-expenses" className="container mx-auto px-4 max-w-7xl scroll-mt-24">
-                    <div className="grid grid-cols-12 gap-8 lg:grid-rows-5 lg:h-[850px] items-stretch">
+                    <div className="grid grid-cols-12 gap-8 lg:grid-rows-5 lg:h-212.5 items-stretch">
                         {/* Sidebar: Form Area (3 rows) */}
-                        <div className="col-span-12 lg:col-span-4 lg:row-span-3 lg:col-start-1 lg:row-start-1 flex flex-col min-h-0 space-y-4 max-h-[500px] lg:max-h-none">
+                        <div className="col-span-12 lg:col-span-4 lg:row-span-3 lg:col-start-1 lg:row-start-1 flex flex-col min-h-0 space-y-4 max-h-125 lg:max-h-none">
                             <div className="space-y-4 text-center md:text-left shrink-0">
                                 <h2 className="text-3xl font-bold tracking-tight">Management</h2>
                                 <p className="text-muted-foreground text-sm leading-relaxed">
@@ -138,24 +160,33 @@ function HomePage() {
                         </div>
 
                         {/* Sidebar: Categories Area (2 rows) */}
-                        <div className="col-span-12 lg:col-span-4 lg:row-span-2 lg:col-start-1 lg:row-start-4 flex flex-col min-h-0 max-h-[400px] lg:max-h-none">
+                        <div className="col-span-12 lg:col-span-4 lg:row-span-2 lg:col-start-1 lg:row-start-4 flex flex-col min-h-0 max-h-100 lg:max-h-none">
                             <CustomCategoriesManager onUpdateCustomCategory={handleUpdateCustomCategory} />
                         </div>
 
                         {/* Main: Table Area (5 rows) */}
-                        <div className="col-span-12 lg:col-span-8 lg:row-span-5 lg:col-start-5 lg:row-start-1 flex flex-col min-h-0 space-y-4 max-h-[800px] lg:max-h-none">
+                        <div className="col-span-12 lg:col-span-8 lg:row-span-5 lg:col-start-5 lg:row-start-1 flex flex-col min-h-0 space-y-4 max-h-200 lg:max-h-none">
                             <div id="history" className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shrink-0">
                                 <div className="space-y-2 text-center md:text-left">
                                     <h2 className="text-3xl font-bold tracking-tight">Transactions</h2>
                                     <p className="text-muted-foreground text-sm">Review your spending history.</p>
                                 </div>
                                 <div className="flex justify-center sm:justify-end">
-                                    <ExpenseDataActions onImportSuccess={handleOnImportSuccess} />
+                                    <ExpenseDataActions
+                                        onImportSuccess={handleOnImportSuccess}
+                                        expensesToExport={filteredExpenses}
+                                        fileName={exportFileName}
+                                    />
                                 </div>
                             </div>
                             <div className="flex-1 min-h-0">
                                 <ExpenseTable
                                     expenses={expenses}
+                                    filteredExpenses={filteredExpenses}
+                                    selectedMonth={selectedMonth}
+                                    selectedCategory={selectedCategory}
+                                    onMonthChange={setSelectedMonth}
+                                    onCategoryChange={setSelectedCategory}
                                     onDeleteExpense={handleDeleteExpense}
                                     onEditExpense={handleEditExpense}
                                     currency={currency}

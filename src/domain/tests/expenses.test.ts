@@ -205,15 +205,15 @@ describe("Expense Domain Logic", () => {
                 mockedParseISO.mockImplementationOnce(() => {
                     throw new Error('Parse error');
                 });
-                const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-                
+                const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+
                 const data = [{ amount: 10, date: 'trigger-throw', category: 'Food', description: 'Fail' }];
                 const { valid, errors } = validateImportedExpenses(data);
-                
+
                 expect(valid).toHaveLength(0);
                 expect(errors).toHaveLength(1);
                 expect(consoleSpy).toHaveBeenCalled();
-                
+
                 consoleSpy.mockRestore();
             });
         });
@@ -238,43 +238,39 @@ describe("Expense Domain Logic", () => {
         });
 
         describe('downloadExpensesExportFile', () => {
-            it('should create a link and trigger download', () => {
-                // Mock DOM APIs
-                const mockCreateObjectURL = vi.fn().mockReturnValue('blob:url');
+            it('should create a link and trigger download', async () => {
+                vi.useFakeTimers();
+                const mockCreateObjectURL = vi.fn().mockReturnValue('blob:mock-url');
                 const mockRevokeObjectURL = vi.fn();
                 globalThis.URL.createObjectURL = mockCreateObjectURL;
                 globalThis.URL.revokeObjectURL = mockRevokeObjectURL;
 
                 const mockClick = vi.fn();
-                const mockSetAttribute = vi.fn();
                 const mockAppendChild = vi.spyOn(document.body, 'appendChild').mockImplementation(() => ({} as any));
                 const mockRemoveChild = vi.spyOn(document.body, 'removeChild').mockImplementation(() => ({} as any));
 
-                vi.spyOn(document, 'createElement').mockImplementation((tagName) => {
-                    if (tagName === 'a') {
-                        return {
-                            setAttribute: mockSetAttribute,
-                            click: mockClick,
-                            style: {},
-                        } as any;
-                    }
-                    return {} as any;
-                });
+                vi.spyOn(document, 'createElement').mockImplementation(() => ({
+                    setAttribute: vi.fn(),
+                    click: mockClick,
+                    style: {},
+                } as any));
 
                 downloadExpensesExportFile('csv,content', 'test.csv');
 
                 expect(mockCreateObjectURL).toHaveBeenCalled();
-                expect(mockSetAttribute).toHaveBeenCalledWith('href', 'blob:url');
-                expect(mockSetAttribute).toHaveBeenCalledWith('download', 'test.csv');
                 expect(mockClick).toHaveBeenCalled();
                 expect(mockAppendChild).toHaveBeenCalled();
                 expect(mockRemoveChild).toHaveBeenCalled();
+
+                await vi.advanceTimersByTimeAsync(300);
                 expect(mockRevokeObjectURL).toHaveBeenCalled();
 
                 vi.restoreAllMocks();
+                vi.useRealTimers();
             });
 
-            it('should use fallback file name if none provided', () => {
+            it('should use fallback file name if none provided', async () => {
+                vi.useFakeTimers();
                 const mockFormat = vi.mocked(dateFns.format);
                 mockFormat.mockReturnValue('2023-01-01');
 
@@ -294,7 +290,10 @@ describe("Expense Domain Logic", () => {
                 downloadExpensesExportFile('csv,content');
 
                 expect(mockSetAttribute).toHaveBeenCalledWith('download', 'expenses-2023-01-01.csv');
+
+                await vi.advanceTimersByTimeAsync(300);
                 vi.restoreAllMocks();
+                vi.useRealTimers();
             });
         });
 

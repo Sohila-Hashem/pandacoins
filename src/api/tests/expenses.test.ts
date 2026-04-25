@@ -50,7 +50,7 @@ describe('Expenses API', () => {
             const result = await exportExpenses();
 
             expect(result.success).toBe(true);
-            expect(domain.downloadExpensesExportFile).toHaveBeenCalledWith('mock,csv,content');
+            expect(domain.downloadExpensesExportFile).toHaveBeenCalledWith('mock,csv,content', undefined);
         });
 
         it('should return error if no expenses to export', async () => {

@@ -40,8 +40,12 @@ test.describe('Import/Export Expenses', () => {
         await expect(page.getByText(/Import complete/i)).toBeVisible();
 
         // 2. Click Export
-        const downloadPromise = page.waitForEvent('download', { timeout: 60000 });
         await page.getByRole('button', { name: /Export CSV/i }).click();
+
+        // 2b. Confirm Export in dialog
+        await expect(page.getByText('Confirm Export')).toBeVisible();
+        const downloadPromise = page.waitForEvent('download', { timeout: 60000 });
+        await page.getByRole('button', { name: 'Export Now' }).click();
         const download = await downloadPromise;
 
         // 3. Verify download

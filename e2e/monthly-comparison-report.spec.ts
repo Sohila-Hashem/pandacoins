@@ -87,8 +87,11 @@ test.describe('Monthly Comparison Report', () => {
         // Open Customization Sheet
         await page.getByRole('button', { name: /customization/i }).click();
 
+        // Wait for sheet to be visible
+        await expect(page.getByRole('dialog')).toBeVisible();
+
         // Select USD from the list
-        await page.getByRole('button', { name: /USD/ }).click();
+        await page.getByRole('button').filter({ hasText: 'USD' }).first().click();
 
         // Close sheet (click outside or escape)
         await page.keyboard.press('Escape');

@@ -45,15 +45,15 @@ async function runWorker(type: ExpensesWorkerType, payload: any): Promise<any> {
     });
 }
 
-export async function exportExpenses() {
+export async function exportExpenses(expensesToExport?: Expense[], fileName?: string) {
     try {
-        const expenses = loadExpenses();
+        const expenses = expensesToExport || loadExpenses();
         if (expenses.length === 0) {
             return { error: "No expenses to export." };
         }
 
         const csvContent = await runWorker(ExpensesWorkerType.GENERATE_CSV, expenses);
-        downloadExpensesExportFile(csvContent);
+        downloadExpensesExportFile(csvContent, fileName);
 
         return { success: true };
     } catch (error) {

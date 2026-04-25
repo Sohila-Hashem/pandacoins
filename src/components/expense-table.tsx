@@ -31,12 +31,17 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { type Currency } from "@/lib/constants";
-import { filterExpensesByMonth, filterExpensesByCategory, getAvailableMonths, getTotalAmount, type Expense } from "@/domain/expense";
+import { getAvailableMonths, getTotalAmount, type Expense } from "@/domain/expense";
 import { formatCurrency } from "@/lib/utils";
 import { CategorySelect } from "@/components/category-select";
 
 interface ExpenseTableProps {
     expenses: Expense[];
+    filteredExpenses: Expense[];
+    selectedMonth: string;
+    selectedCategory: string;
+    onMonthChange: (month: string) => void;
+    onCategoryChange: (category: string) => void;
     onDeleteExpense: (id: string) => void;
     onEditExpense: (expense: Expense) => void;
     currency: Currency;
@@ -45,29 +50,21 @@ interface ExpenseTableProps {
 
 export function ExpenseTable({
     expenses,
+    filteredExpenses,
+    selectedMonth,
+    selectedCategory,
+    onMonthChange,
+    onCategoryChange,
     onDeleteExpense,
     onEditExpense,
     currency,
     customCategories = [],
 }: ExpenseTableProps) {
-    const [selectedMonth, setSelectedMonth] = useState<string>("all");
-    const [selectedCategory, setSelectedCategory] = useState<string>("all");
     const [deleteId, setDeleteId] = useState<string | null>(null);
 
     const availableMonths = useMemo(() => {
         return getAvailableMonths(expenses);
     }, [expenses]);
-
-    const filteredExpenses = useMemo(() => {
-        let result = expenses;
-        if (selectedMonth !== "all") {
-            result = filterExpensesByMonth(result, selectedMonth);
-        }
-        if (selectedCategory !== "all") {
-            result = filterExpensesByCategory(result, selectedCategory);
-        }
-        return result;
-    }, [expenses, selectedMonth, selectedCategory]);
 
     const sortedExpenses = useMemo(() => {
         return [...filteredExpenses].sort((a, b) => {
@@ -106,7 +103,7 @@ export function ExpenseTable({
                             <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
                                     <span className="text-sm text-muted-foreground whitespace-nowrap">Month:</span>
-                                    <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                                    <Select value={selectedMonth} onValueChange={onMonthChange}>
                                         <SelectTrigger className="w-full sm:w-[140px]">
                                             <SelectValue />
                                         </SelectTrigger>
@@ -124,7 +121,7 @@ export function ExpenseTable({
                                     <span className="text-sm text-muted-foreground whitespace-nowrap">Category:</span>
                                     <CategorySelect
                                         value={selectedCategory}
-                                        onValueChange={setSelectedCategory}
+                                        onValueChange={onCategoryChange}
                                         customCategories={customCategories}
                                         showAllOption
                                         triggerClassName="w-full sm:w-[160px]"

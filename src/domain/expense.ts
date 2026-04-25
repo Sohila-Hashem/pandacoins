@@ -171,7 +171,10 @@ export const downloadExpensesExportFile = (csvContent: string, fileName?: string
     link.click();
     document.body.removeChild(link);
 
-    URL.revokeObjectURL(url);
+    // Delay revocation to ensure the browser has started the download
+    setTimeout(() => {
+        URL.revokeObjectURL(url);
+    }, 300);
 }
 
 

@@ -1,8 +1,9 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ExpenseDataActions } from '../expense-data-actions';
 import * as api from '@/api/expenses';
 import { toast } from 'sonner';
+import type { Expense } from '@/domain/expense';
 
 vi.mock('@/api/expenses', () => ({
     exportExpenses: vi.fn(),
@@ -15,12 +16,46 @@ vi.mock('@/api/expenses', () => ({
 
 vi.mock('sonner', () => ({
     toast: {
-        promise: vi.fn((promise, _data) => promise),
+        promise: vi.fn(async (promise, data) => {
+            try {
+                const res = await promise;
+                if (data?.success) {
+                    if (typeof data.success === 'function') {
+                        data.success(res);
+                    }
+                }
+            } catch (err) {
+                if (data?.error) {
+                    if (typeof data.error === 'function') {
+                        data.error(err);
+                    }
+                }
+            } finally {
+                if (data?.finally) {
+                    data.finally();
+                }
+            }
+            return promise;
+        }),
         loading: vi.fn().mockReturnValue('loading-id'),
         success: vi.fn(),
         error: vi.fn(),
     },
 }));
+
+const mockedExpenses: Expense[] = [{
+    id: '1',
+    amount: 100,
+    category: 'groceries',
+    description: 'groceries',
+    date: '2022-01-01',
+}, {
+    id: '2',
+    amount: 100,
+    category: 'groceries',
+    description: 'groceries',
+    date: '2022-01-01',
+}];
 
 describe('ExpenseDataActions', () => {
     beforeEach(() => {
@@ -33,14 +68,37 @@ describe('ExpenseDataActions', () => {
         expect(screen.getByText('Export CSV')).toBeInTheDocument();
     });
 
+    it('triggers file input click when Import CSV button is clicked', () => {
+        const clickSpy = vi.spyOn(HTMLInputElement.prototype, 'click');
+        render(<ExpenseDataActions />);
+        
+        fireEvent.click(screen.getByText('Import CSV'));
+        
+        expect(clickSpy).toHaveBeenCalled();
+        clickSpy.mockRestore();
+    });
+
     it('calls exportExpenses when Export CSV is clicked', async () => {
         vi.mocked(api.exportExpenses).mockResolvedValue({ success: true });
-        render(<ExpenseDataActions />);
+        render(<ExpenseDataActions expensesToExport={mockedExpenses} />);
 
         fireEvent.click(screen.getByText('Export CSV'));
 
+        // Confirmation dialog should appear
+        expect(screen.getByText('Confirm Export')).toBeInTheDocument();
+        fireEvent.click(screen.getByText('Export Now'));
+
         expect(api.exportExpenses).toHaveBeenCalled();
         expect(toast.promise).toHaveBeenCalled();
+    });
+
+    it('shows error if trying to export zero expenses', async () => {
+        render(<ExpenseDataActions expensesToExport={[]} />);
+
+        fireEvent.click(screen.getByText('Export CSV'));
+
+        expect(toast.error).toHaveBeenCalledWith("No expenses found to export.");
+        expect(api.exportExpenses).not.toHaveBeenCalled();
     });
 
     it('opens dialog when a file is selected', async () => {
@@ -115,12 +173,15 @@ describe('ExpenseDataActions', () => {
 
     it('throws error in success callback if data has error (export)', async () => {
         vi.mocked(api.exportExpenses).mockResolvedValue({ error: 'Export failed' });
-        render(<ExpenseDataActions />);
+        render(<ExpenseDataActions expensesToExport={mockedExpenses} />);
 
         fireEvent.click(screen.getByText('Export CSV'));
+        fireEvent.click(screen.getByText('Export Now'));
 
         // toast.promise handles the success/error callbacks
-        const promiseCall = vi.mocked(toast.promise).mock.calls[0];
+        const promiseCall = vi.mocked(toast.promise).mock.calls.find(call => call[1]?.success);
+        if (!promiseCall) throw new Error('toast.promise success callback not found');
+
         const successCallback = (promiseCall[1] as any).success;
 
         expect(() => successCallback({ error: 'Export failed' })).toThrow('Export failed');
@@ -157,8 +218,50 @@ describe('ExpenseDataActions', () => {
         });
     });
 
-    it('works without onImportSuccess callback', async () => {
-        vi.mocked(api.importExpenses).mockResolvedValue({ success: true, count: 1, skippedCount: 0, errors: [] });
+    it('handles file change with no file', async () => {
+        const { container } = render(<ExpenseDataActions />);
+        const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+
+        fireEvent.change(input, { target: { files: [] } });
+        expect(screen.queryByText('Import Expenses')).not.toBeInTheDocument();
+    });
+
+    it('resets file input value after selection', async () => {
+        const { container } = render(<ExpenseDataActions />);
+        const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+
+        const file = new File(['csv'], 'test.csv');
+        fireEvent.change(input, { target: { files: [file] } });
+        
+        expect(input.value).toBe('');
+    });
+
+    it('disables export button while exporting', async () => {
+        // Use a promise that doesn't resolve immediately
+        let resolveExport: (value: any) => void = () => {};
+        const exportPromise = new Promise((resolve) => { resolveExport = resolve; });
+        vi.mocked(api.exportExpenses).mockReturnValue(exportPromise as any);
+
+        render(<ExpenseDataActions expensesToExport={mockedExpenses} />);
+
+        fireEvent.click(screen.getByText('Export CSV'));
+        fireEvent.click(screen.getByText('Export Now'));
+
+        expect(screen.getByRole('button', { name: /Export CSV/i })).toBeDisabled();
+
+        await act(async () => {
+            resolveExport({ success: true });
+        });
+        
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: /Export CSV/i })).not.toBeDisabled();
+        });
+    });
+
+    it('disables import button while importing', async () => {
+        let resolveImport: (value: any) => void = () => {};
+        const importPromise = new Promise((resolve) => { resolveImport = resolve; });
+        vi.mocked(api.importExpenses).mockReturnValue(importPromise as any);
 
         const { container } = render(<ExpenseDataActions />);
         const input = container.querySelector('input[type="file"]') as HTMLInputElement;
@@ -167,8 +270,56 @@ describe('ExpenseDataActions', () => {
 
         fireEvent.click(screen.getByText('Start Import'));
 
+        expect(screen.getByRole('button', { name: /Import CSV/i })).toBeDisabled();
+
+        await act(async () => {
+            resolveImport({ success: true, count: 1, skippedCount: 0, errors: [] });
+        });
+
         await waitFor(() => {
-            expect(toast.success).toHaveBeenCalled();
+            expect(screen.getByRole('button', { name: /Import CSV/i })).not.toBeDisabled();
+        });
+    });
+
+    it('handles export promise error callback', async () => {
+        render(<ExpenseDataActions expensesToExport={mockedExpenses} />);
+
+        fireEvent.click(screen.getByText('Export CSV'));
+        fireEvent.click(screen.getByText('Export Now'));
+
+        const promiseCall = vi.mocked(toast.promise).mock.calls.find(call => call[1]?.error);
+        if (!promiseCall) throw new Error('toast.promise error callback not found');
+
+        const errorCallback = (promiseCall[1] as any).error;
+        expect(errorCallback(new Error('Network error'))).toBe('Network error');
+    });
+
+    it('clears pending file when dialog is closed', async () => {
+        const { container } = render(<ExpenseDataActions />);
+        const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+        const file = new File(['csv'], 'test.csv');
+        fireEvent.change(input, { target: { files: [file] } });
+
+        expect(screen.getByText('Import Expenses')).toBeInTheDocument();
+        
+        // Find and click Cancel button in dialog
+        fireEvent.click(screen.getByText('Cancel'));
+        
+        await waitFor(() => {
+            expect(screen.queryByText('Import Expenses')).not.toBeInTheDocument();
+        });
+    });
+
+    it('closes export confirmation when Cancel is clicked', async () => {
+        render(<ExpenseDataActions expensesToExport={mockedExpenses} />);
+
+        fireEvent.click(screen.getByText('Export CSV'));
+        expect(screen.getByText('Confirm Export')).toBeInTheDocument();
+        
+        fireEvent.click(screen.getByText('Cancel'));
+        
+        await waitFor(() => {
+            expect(screen.queryByText('Confirm Export')).not.toBeInTheDocument();
         });
     });
 });
