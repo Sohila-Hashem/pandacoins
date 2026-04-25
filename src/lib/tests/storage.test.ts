@@ -8,6 +8,8 @@ import {
     loadCustomCategories,
     loadCurrency,
     saveCurrency,
+    mergeExpensesWithExisting,
+    mergeCustomCategoriesWithExisting,
 } from '@/lib/storage';
 import type { Expense } from '@/domain/expense';
 
@@ -164,5 +166,48 @@ describe('loadCustomCategories', () => {
         const result = loadCustomCategories();
         expect(result).toEqual([]);
         expect(mockRemoveItem).toHaveBeenCalledWith('custom_categories');
+    });
+});
+
+// ─── mergeExpensesWithExisting ────────────────────────────────────────────────
+
+describe('mergeExpensesWithExisting', () => {
+    it('merges new expenses with existing ones and saves them', () => {
+        const existing: Expense[] = [
+            { id: '1', description: 'Old', amount: 10, date: '2026-01-01', category: 'Food' }
+        ];
+        const newExpenses: Expense[] = [
+            { id: '1', description: 'Updated', amount: 15, date: '2026-01-01', category: 'Food' },
+            { id: '2', description: 'New', amount: 20, date: '2026-01-02', category: 'Transport' }
+        ];
+        
+        mockGetItem.mockReturnValue(JSON.stringify(existing));
+        
+        mergeExpensesWithExisting(newExpenses);
+        
+        expect(mockSetItem).toHaveBeenCalledWith('expenses', expect.stringContaining('"description":"Updated"'));
+        expect(mockSetItem).toHaveBeenCalledWith('expenses', expect.stringContaining('"description":"New"'));
+        const saved = JSON.parse(mockSetItem.mock.calls[0][1] as string);
+        expect(saved).toHaveLength(2);
+    });
+});
+
+// ─── mergeCustomCategoriesWithExisting ────────────────────────────────────────
+
+describe('mergeCustomCategoriesWithExisting', () => {
+    it('merges unique custom categories and saves them', () => {
+        const existing = ['Food', 'Travel'];
+        const newCategories = ['Travel', 'Entertainment', 'Health'];
+        
+        mockGetItem.mockReturnValue(JSON.stringify(existing));
+        
+        mergeCustomCategoriesWithExisting(newCategories);
+        
+        const saved = JSON.parse(mockSetItem.mock.calls[0][1] as string);
+        expect(saved).toHaveLength(4); // Food, Travel, Entertainment, Health
+        expect(saved).toContain('Food');
+        expect(saved).toContain('Travel');
+        expect(saved).toContain('Entertainment');
+        expect(saved).toContain('Health');
     });
 });

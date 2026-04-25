@@ -12,7 +12,7 @@ vi.mock('@/hooks/use-custom-categories', () => ({
 }));
 
 // Mock ResizeObserver for Popover/Dialog
-global.ResizeObserver = class ResizeObserver {
+globalThis.ResizeObserver = class ResizeObserver {
     observe() { }
     unobserve() { }
     disconnect() { }

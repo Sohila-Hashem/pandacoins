@@ -1,31 +1,42 @@
-import { loadExpenses, overwriteExpenses, loadCustomCategories } from "@/lib/storage";
-import { validateImportedExpenses, mergeExpenses } from "@/domain/expense-csv";
-import { addCustomCategory } from "@/api/custom-categories";
-import { CATEGORIES } from "@/domain/expense";
+import { loadExpenses, mergeExpensesWithExisting, saveExpenses, mergeCustomCategoriesWithExisting } from "@/lib/storage";
+import { validateImportedExpenses, downloadExpensesExportFile, type Expense, isPresetExpenseCategory } from "@/domain/expense";
+
+export enum ImportMode {
+    MERGE = 'merge',
+    OVERWRITE = 'overwrite',
+}
+
+export enum ExpensesWorkerType {
+    GENERATE_CSV = 'GENERATE_CSV',
+    PARSE_CSV = 'PARSE_CSV',
+}
 
 export interface ImportOptions {
-    mode: 'append' | 'overwrite';
+    mode: ImportMode;
     addMissingCategories: boolean;
 }
+
+import CsvWorker from '../workers/csv.worker.ts?worker';
 
 /**
  * Communicates with the CSV Web Worker.
  */
-async function runWorker(type: 'GENERATE_CSV' | 'PARSE_CSV', payload: any): Promise<any> {
+async function runWorker(type: ExpensesWorkerType, payload: any): Promise<any> {
     return new Promise((resolve, reject) => {
-        const worker = new Worker(new URL('../workers/csv.worker.ts', import.meta.url), { type: 'module' });
-        
+        const worker = new CsvWorker();
+
         worker.onmessage = (event) => {
             const { type: responseType, payload: responsePayload, error } = event.data;
             if (responseType === 'SUCCESS') {
                 resolve(responsePayload);
             } else {
-                reject(new Error(error || 'Worker error'));
+                reject(new Error(error || 'Something went wrong. Please try again later.'));
             }
             worker.terminate();
         };
 
         worker.onerror = (error) => {
+            console.error(error);
             reject(error);
             worker.terminate();
         };
@@ -41,19 +52,9 @@ export async function exportExpenses() {
             return { error: "No expenses to export." };
         }
 
-        const csvContent = await runWorker('GENERATE_CSV', expenses);
-        
-        // Trigger browser download
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", `expenses-export-${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
+        const csvContent = await runWorker(ExpensesWorkerType.GENERATE_CSV, expenses);
+        downloadExpensesExportFile(csvContent);
+
         return { success: true };
     } catch (error) {
         console.error("Export error:", error);
@@ -64,7 +65,7 @@ export async function exportExpenses() {
 export async function importExpenses(file: File, options: ImportOptions) {
     try {
         const text = await file.text();
-        const rawData = await runWorker('PARSE_CSV', text);
+        const rawData = await runWorker(ExpensesWorkerType.PARSE_CSV, text);
 
         const { valid, errors } = validateImportedExpenses(rawData);
 
@@ -74,31 +75,22 @@ export async function importExpenses(file: File, options: ImportOptions) {
 
         // Handle custom categories
         if (options.addMissingCategories) {
-            const customCategories = loadCustomCategories();
-            const presetCategories = CATEGORIES.map(c => c.category);
-            const allCategories = new Set([...presetCategories, ...customCategories]);
-
-            for (const expense of valid) {
-                if (!allCategories.has(expense.category as string)) {
-                    addCustomCategory(expense.category as string);
-                    allCategories.add(expense.category as string);
-                }
-            }
+            const newCustomCategories = valid.filter((expense: Expense) => !isPresetExpenseCategory(expense.category)).map((expense: Expense) => expense.category);
+            mergeCustomCategoriesWithExisting(newCustomCategories);
         }
 
-        // Persist data
-        if (options.mode === 'overwrite') {
-            overwriteExpenses(valid);
-        } else {
-            // If append, use the merge logic from domain to avoid duplicates if ID matches
-            const current = loadExpenses();
-            const merged = mergeExpenses(current, valid);
-            overwriteExpenses(merged); // mergeExpenses already combined them
+        switch (options.mode) {
+            case ImportMode.OVERWRITE:
+                saveExpenses(valid);
+                break;
+            case ImportMode.MERGE:
+                mergeExpensesWithExisting(valid);
+                break;
         }
 
-        return { 
-            success: true, 
-            count: valid.length, 
+        return {
+            success: true,
+            count: valid.length,
             skippedCount: errors.length,
             errors: errors.length > 5 ? [...errors.slice(0, 5), `...and ${errors.length - 5} more`] : errors
         };

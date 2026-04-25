@@ -6,7 +6,7 @@ import { CURRENCIES } from '@/lib/constants';
 import type { Expense } from '@/domain/expense';
 
 // Mock ResizeObserver
-global.ResizeObserver = class ResizeObserver {
+globalThis.ResizeObserver = class ResizeObserver {
     observe() { }
     unobserve() { }
     disconnect() { }

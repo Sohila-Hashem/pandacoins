@@ -1,20 +1,21 @@
 import { fromCSV, toCSV } from '../lib/csv-utils';
+import { ExpensesWorkerType } from '../api/expenses';
 
 /**
  * Web Worker for handling CSV processing off-main-thread.
  */
 
-self.onmessage = (event: MessageEvent) => {
+globalThis.onmessage = (event: MessageEvent) => {
     const { type, payload } = event.data;
 
     try {
         switch (type) {
-            case 'GENERATE_CSV': {
+            case ExpensesWorkerType.GENERATE_CSV: {
                 const csv = toCSV(payload);
                 self.postMessage({ type: 'SUCCESS', payload: csv });
                 break;
             }
-            case 'PARSE_CSV': {
+            case ExpensesWorkerType.PARSE_CSV: {
                 const data = fromCSV(payload);
                 self.postMessage({ type: 'SUCCESS', payload: data });
                 break;
@@ -23,9 +24,9 @@ self.onmessage = (event: MessageEvent) => {
                 self.postMessage({ type: 'ERROR', error: 'Unknown message type' });
         }
     } catch (error) {
-        self.postMessage({ 
-            type: 'ERROR', 
-            error: error instanceof Error ? error.message : 'An unknown error occurred in the worker' 
+        self.postMessage({
+            type: 'ERROR',
+            error: error instanceof Error ? error.message : 'An unknown error occurred in the worker'
         });
     }
 };

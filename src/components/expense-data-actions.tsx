@@ -6,7 +6,7 @@ import { exportExpenses, importExpenses, type ImportOptions } from "@/api/expens
 import { ImportOptionsDialog } from "./import-options-dialog";
 
 interface ExpenseDataActionsProps {
-    onImportSuccess?: () => void;
+    readonly onImportSuccess?: () => void;
 }
 
 export function ExpenseDataActions({ onImportSuccess }: ExpenseDataActionsProps) {
@@ -49,9 +49,10 @@ export function ExpenseDataActions({ onImportSuccess }: ExpenseDataActionsProps)
             const result = await importExpenses(pendingFile, options);
 
             if (result.success) {
+                const successMessageDescription = `Added ${result.count} expenses. ${result.skippedCount > 0 ? `Skipped ${result.skippedCount} invalid rows.` : ''}`
                 toast.success(`Import complete!`, {
                     id: loadingToast,
-                    description: `Added ${result.count} expenses. ${result.skippedCount > 0 ? `Skipped ${result.skippedCount} invalid rows.` : ''}`,
+                    description: successMessageDescription,
                 });
                 // Trigger callback to update state
                 onImportSuccess?.();
@@ -59,6 +60,7 @@ export function ExpenseDataActions({ onImportSuccess }: ExpenseDataActionsProps)
                 toast.error(result.error || 'Import failed', { id: loadingToast });
             }
         } catch (error) {
+            console.error(error);
             toast.error('An unexpected error occurred during import.', { id: loadingToast });
         } finally {
             setIsImporting(false);

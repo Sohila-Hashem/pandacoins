@@ -7,7 +7,7 @@ export const Route = createRootRoute({
     component: () => (
         <CustomCategoriesProvider>
             <Outlet />
-            <Toaster richColors position="top-center" />
+            <Toaster richColors position="top-right" />
             <div className="fixed bottom-6 right-6 z-50">
                 <CustomizationToggle />
             </div>
