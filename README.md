@@ -29,8 +29,9 @@ I built a minimalistic expense tracker and analyzer that allows users to:
 - Track expenses in a clean, table-based format
 - Categorize transactions
 - Generate natural-language explanations of spending behavior
-- Quickly skim through monthly expense summaries
+- quickly skim through monthly expense summaries
 - Support multiple currencies and custom categories
+- **Import/Export**: Easily move your data in and out via CSV for backups or migrations.
 - **Installable PWA**: Access PandaCoins instantly from your home screen with offline support.
 
 ## Tech Stack
@@ -54,6 +55,9 @@ I built a minimalistic expense tracker and analyzer that allows users to:
 
 - **Vite PWA Plugin**  
   Used to transform the app into a Progressive Web App, enabling installation and offline capabilities.
+
+- **Web Workers**  
+  Used to handle CSV parsing and generation off the main thread, ensuring a smooth UI even when processing thousands of rows.
 
 ### Testing
 
@@ -120,6 +124,6 @@ npm run dev
 - [x] Support for custom categories
 - [x] Allow filtering by category
 - [x] **PWA Support**: App is now installable and works offline.
-- [ ] Import expenses from a CSV file
+- [x] **Import/Export**: Import expenses from CSV and export your data for backups.
 - [ ] Export reports as PDF
 - [ ] Optionally sync expenses and preferences (custom categories, currency, etc.) across devices by creating an account.

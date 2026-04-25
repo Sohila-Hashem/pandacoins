@@ -13,6 +13,7 @@ interface CustomCategoriesContextType {
     readonly add: (category: string) => void;
     readonly remove: (category: string) => void;
     readonly update: (oldName: string, newName: string) => void;
+    readonly refresh: () => void;
 }
 
 const CustomCategoriesContext = createContext<CustomCategoriesContextType | undefined>(undefined);
@@ -65,13 +66,23 @@ export function CustomCategoriesProvider({ children }: { readonly children: Reac
         toast.success("Category updated!");
     }, []);
 
+    const refresh = useCallback(() => {
+        const result = getCustomCategories();
+        if (result.success && result.data) {
+            setCustomCategories(result.data);
+        } else if (result.error) {
+            toast.error(result.error ?? "Failed to load custom categories");
+        }
+    }, []);
+
     const providerData = useMemo(() => ({
         customCategories,
         isInitialized,
         add,
         remove,
-        update
-    }), [customCategories, isInitialized, add, remove, update]);
+        update,
+        refresh
+    }), [customCategories, isInitialized, add, remove, update, refresh]);
 
     return (
         <CustomCategoriesContext.Provider value={providerData}>

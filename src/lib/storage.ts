@@ -12,6 +12,18 @@ export const saveExpenses = (expenses: Expense[]) => {
     localStorage.setItem(STORAGE_KEYS.EXPENSES, JSON.stringify(expenses));
 }
 
+export const mergeExpensesWithExisting = (newExpenses: Expense[]) => {
+    const currentExpenses = loadExpenses();
+    const updatedExpenses = newExpenses.reduce((acc, expense) => {
+        const existingExpense = acc.find((e) => e.id === expense.id);
+        if (existingExpense) {
+            return acc.map((e) => (e.id === expense.id ? expense : e));
+        }
+        return [...acc, expense];
+    }, currentExpenses);
+    saveExpenses(updatedExpenses);
+}
+
 export const loadExpenses = (): Expense[] => {
     const data = localStorage.getItem(STORAGE_KEYS.EXPENSES);
     return data ? JSON.parse(data) : [];
@@ -50,4 +62,10 @@ export const loadCustomCategories = (): CustomCategory[] => {
 
 export const saveCustomCategories = (categories: CustomCategory[]) => {
     localStorage.setItem(STORAGE_KEYS.CUSTOM_CATEGORIES, JSON.stringify(categories));
+}
+
+export const mergeCustomCategoriesWithExisting = (newCategories: CustomCategory[]) => {
+    const currentCategories = loadCustomCategories();
+    const updatedCustomCategories = new Set([...currentCategories, ...newCategories])
+    saveCustomCategories(Array.from(updatedCustomCategories));
 }

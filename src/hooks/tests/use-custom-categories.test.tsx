@@ -144,4 +144,40 @@ describe('useCustomCategories', () => {
         expect(result.current.customCategories).toContain('Old Name');
         expect(result.current.customCategories).not.toContain('New Name');
     });
+
+    it('refreshes categories successfully', async () => {
+        vi.mocked(api.getCustomCategories).mockReturnValue({ success: true, data: ['Initial'] });
+        
+        const { result } = renderHook(() => useCustomCategories(), { wrapper });
+        expect(result.current.customCategories).toEqual(['Initial']);
+
+        // Simulate external change
+        vi.mocked(api.getCustomCategories).mockReturnValue({ success: true, data: ['Initial', 'Refreshed'] });
+
+        await act(async () => {
+            result.current.refresh();
+        });
+
+        expect(result.current.customCategories).toEqual(['Initial', 'Refreshed']);
+    });
+
+    it('shows error toast if refresh fails', async () => {
+        vi.mocked(api.getCustomCategories).mockReturnValue({ success: true, data: ['Initial'] });
+        const { result } = renderHook(() => useCustomCategories(), { wrapper });
+
+        vi.mocked(api.getCustomCategories).mockReturnValue({ error: 'Refresh failed' });
+
+        await act(async () => {
+            result.current.refresh();
+        });
+
+        expect(toast.error).toHaveBeenCalledWith('Refresh failed');
+    });
+
+    it('sets isInitialized to true after mount', async () => {
+        vi.mocked(api.getCustomCategories).mockReturnValue({ success: true, data: [] });
+        const { result } = renderHook(() => useCustomCategories(), { wrapper });
+        
+        expect(result.current.isInitialized).toBe(true);
+    });
 });

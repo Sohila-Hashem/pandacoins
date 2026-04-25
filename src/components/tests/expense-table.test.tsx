@@ -6,7 +6,7 @@ import { CURRENCIES } from '@/lib/constants';
 import type { Expense } from '@/domain/expense';
 
 // Mock ResizeObserver
-global.ResizeObserver = class ResizeObserver {
+globalThis.ResizeObserver = class ResizeObserver {
     observe() { }
     unobserve() { }
     disconnect() { }
@@ -18,6 +18,41 @@ Element.prototype.hasPointerCapture = vi.fn();
 Element.prototype.releasePointerCapture = vi.fn();
 Element.prototype.setPointerCapture = vi.fn();
 
+import { useState, useMemo } from 'react';
+import { filterExpensesByMonth, filterExpensesByCategory } from '@/domain/expense';
+
+const TestWrapper = ({ 
+    expenses, 
+    currency, 
+    customCategories = [],
+    onDeleteExpense = vi.fn(),
+    onEditExpense = vi.fn()
+}: any) => {
+    const [month, setMonth] = useState('all');
+    const [category, setCategory] = useState('all');
+    
+    const filtered = useMemo(() => {
+        let result = expenses;
+        if (month !== "all") result = filterExpensesByMonth(result, month);
+        if (category !== "all") result = filterExpensesByCategory(result, category);
+        return result;
+    }, [expenses, month, category]);
+
+    return (
+        <ExpenseTable
+            expenses={expenses}
+            filteredExpenses={filtered}
+            selectedMonth={month}
+            selectedCategory={category}
+            onMonthChange={setMonth}
+            onCategoryChange={setCategory}
+            onDeleteExpense={onDeleteExpense}
+            onEditExpense={onEditExpense}
+            currency={currency}
+            customCategories={customCategories}
+        />
+    );
+};
 
 describe('ExpenseTable', () => {
     const mockCurrency = CURRENCIES[0]; // USD
@@ -33,7 +68,7 @@ describe('ExpenseTable', () => {
 
     it('renders empty state when no expenses', () => {
         render(
-            <ExpenseTable
+            <TestWrapper
                 expenses={[]}
                 onDeleteExpense={onDeleteExpense}
                 onEditExpense={onEditExpense}
@@ -45,7 +80,7 @@ describe('ExpenseTable', () => {
 
     it('renders expenses correctly', () => {
         render(
-            <ExpenseTable
+            <TestWrapper
                 expenses={mockExpenses}
                 onDeleteExpense={onDeleteExpense}
                 onEditExpense={onEditExpense}
@@ -65,7 +100,7 @@ describe('ExpenseTable', () => {
 
     it('renders both month and category filter selects', () => {
         render(
-            <ExpenseTable
+            <TestWrapper
                 expenses={mockExpenses}
                 onDeleteExpense={onDeleteExpense}
                 onEditExpense={onEditExpense}
@@ -80,7 +115,7 @@ describe('ExpenseTable', () => {
     it('filters expenses by month', async () => {
         const user = userEvent.setup();
         render(
-            <ExpenseTable
+            <TestWrapper
                 expenses={mockExpenses}
                 onDeleteExpense={onDeleteExpense}
                 onEditExpense={onEditExpense}
@@ -111,7 +146,7 @@ describe('ExpenseTable', () => {
     it('filters expenses by a preset category', async () => {
         const user = userEvent.setup();
         render(
-            <ExpenseTable
+            <TestWrapper
                 expenses={mockExpenses}
                 onDeleteExpense={onDeleteExpense}
                 onEditExpense={onEditExpense}
@@ -151,7 +186,7 @@ describe('ExpenseTable', () => {
         ];
 
         render(
-            <ExpenseTable
+            <TestWrapper
                 expenses={expensesWithCustom}
                 onDeleteExpense={onDeleteExpense}
                 onEditExpense={onEditExpense}
@@ -175,7 +210,7 @@ describe('ExpenseTable', () => {
     it('resets to all expenses when "All Categories" is selected', async () => {
         const user = userEvent.setup();
         render(
-            <ExpenseTable
+            <TestWrapper
                 expenses={mockExpenses}
                 onDeleteExpense={onDeleteExpense}
                 onEditExpense={onEditExpense}
@@ -208,7 +243,7 @@ describe('ExpenseTable', () => {
         ];
 
         render(
-            <ExpenseTable
+            <TestWrapper
                 expenses={expenses}
                 onDeleteExpense={onDeleteExpense}
                 onEditExpense={onEditExpense}
@@ -235,7 +270,7 @@ describe('ExpenseTable', () => {
     it('calls onEditExpense when edit button is clicked', async () => {
         const user = userEvent.setup();
         render(
-            <ExpenseTable
+            <TestWrapper
                 expenses={[mockExpenses[0]]}
                 onDeleteExpense={onDeleteExpense}
                 onEditExpense={onEditExpense}
@@ -254,7 +289,7 @@ describe('ExpenseTable', () => {
     it('opens delete interactions correctly', async () => {
         const user = userEvent.setup();
         render(
-            <ExpenseTable
+            <TestWrapper
                 expenses={[mockExpenses[0]]}
                 onDeleteExpense={onDeleteExpense}
                 onEditExpense={onEditExpense}

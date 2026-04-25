@@ -11,7 +11,7 @@ import {
     Settings2
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { ComingSoonBadge } from "./shared/badges";
+import { BetaBadge } from "./shared/badges";
 
 const features = [
     {
@@ -67,7 +67,7 @@ const features = [
         icon: <Database className="w-8 h-8 text-indigo-500" />,
         title: "Local Sovereignty",
         description: "Export and import your data anytime. You are the master of your records.",
-        badge: <ComingSoonBadge />
+        badge: <BetaBadge />
     }
 ];
 

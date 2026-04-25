@@ -47,13 +47,13 @@ describe('FeaturesHighlight', () => {
         expect(screen.getByText(/Export and import your data anytime/i)).toBeInTheDocument();
     });
 
-    it('renders a "Coming Soon" badge on the "Local Sovereignty" card', () => {
+    it('renders a "Beta" badge on the "Local Sovereignty" card', () => {
         render(<FeaturesHighlight />);
-        expect(screen.getByText('Coming Soon')).toBeInTheDocument();
+        expect(screen.getByText('Beta')).toBeInTheDocument();
     });
 
-    it('renders exactly one "Coming Soon" badge', () => {
+    it('renders exactly one "Beta" badge', () => {
         render(<FeaturesHighlight />);
-        expect(screen.getAllByText('Coming Soon')).toHaveLength(1);
+        expect(screen.getAllByText('Beta')).toHaveLength(1);
     });
 });
