@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="robots" content="noindex, nofollow" />
+		<title>Data Migration Helper</title>
+	</head>
+	<body>
+		<script>
+			/**
+			 * This page is loaded as a hidden iframe by the NEW domain (pandacoins.vercel.app).
+			 * It reads the localStorage data from the OLD domain and posts it back via postMessage.
+			 *
+			 * Security:
+			 *  - Only responds to ping messages whose origin is exactly the new domain.
+			 *  - Never exposes data proactively — only on request.
+			 */
+
+			const NEW_DOMAIN_ORIGIN = "https://pandacoins.vercel.app";
+
+			const STORAGE_KEYS = ["expenses", "currency", "custom_categories"];
+
+			window.addEventListener("message", function (event) {
+				if (event.origin !== NEW_DOMAIN_ORIGIN) return;
+				if (!event.data || event.data.type !== "MIGRATION_PING") return;
+
+				var payload = {};
+				STORAGE_KEYS.forEach(function (key) {
+					var value = localStorage.getItem(key);
+					if (value !== null) {
+						payload[key] = value;
+					}
+				});
+
+				event.source.postMessage(
+					{ type: "MIGRATION_PONG", payload: payload },
+					event.origin,
+				);
+			});
+		</script>
+	</body>
+</html>

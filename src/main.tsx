@@ -11,6 +11,7 @@ import reportWebVitals from './reportWebVitals.ts'
 import * as Sentry from "@sentry/react";
 import { registerSW } from 'virtual:pwa-register'
 import { CurrencyProvider } from '@/hooks/use-currency.tsx'
+import { runMigrationIfNeeded } from '@/lib/migration'
 
 // Register PWA service worker
 registerSW({ immediate: true })
@@ -53,6 +54,9 @@ declare module '@tanstack/react-router' {
     router: typeof router
   }
 }
+
+// Migrate localStorage data from the old domain on first visit
+runMigrationIfNeeded()
 
 // Render the app
 const rootElement = document.getElementById('app')
